@@ -1,0 +1,407 @@
+---
+// 引入需要的图标
+import { Sun, Moon, BookOpen, Calendar, BarChart3, ChevronUp, MessageSquare,Star,X } from './react/Icons';
+import React from 'react';
+export interface Props {
+    showScrollTop?: boolean;
+    showThemeSwitcher?: boolean;
+    showModuleNav?: boolean;
+    modules?: {
+        id: string;
+        title: string;
+        icon: keyof typeof moduleIcons;
+    }[];
+    availableThemes?: {
+        value: string;
+        label: string;
+        icon: keyof typeof moduleIcons;
+    }[];
+}
+
+// 定义模块图标映射
+const moduleIcons = {
+    BookOpen,
+    Calendar,
+    BarChart3,
+    MessageSquare,
+    Sun,
+    Moon
+};
+
+const {
+    showScrollTop = true,
+    showThemeSwitcher = true,
+    showModuleNav = true,
+    modules = [
+        { id: 'hero', title: 'Home', icon: 'BookOpen' },
+        { id: 'notebook-kanban', title: 'Kanban', icon: 'BarChart3' },
+        { id: 'event-calendar', title: 'Calendar', icon: 'Calendar' },
+    ],
+    availableThemes = [
+        { value: 'valentine', label: '浪漫粉', icon: 'Sun' }, 
+        { value: 'dracula', label: '暗黑', icon: 'Moon' }, 
+        { value: 'winter', label: '冬日', icon: 'Sun' },
+        { value: 'synthwave', label: '赛博朋克', icon: 'Moon' },
+    ]
+} = Astro.props;
+---
+
+<div id="draggable-container" class="fixed bottom-6 right-6 z-50 cursor-grab active:cursor-grabbing" style="transform: translate(0px, 0px);">
+    <!-- 使用daisyUI的Collapse组件，并添加ID以便脚本控制 -->
+    <div id="floating-menu-collapse" class="collapse">
+        <input type="checkbox" id="menu-toggle-checkbox" class="peer sr-only" /> {/* sr-only for accessibility */}
+
+        <!-- 菜单触发按钮 - 添加旋转动画和阴影反馈 -->
+        <label for="menu-toggle-checkbox" class="btn btn-primary btn-circle shadow-lg transition-transform duration-300 ease-in-out menu-toggle-btn peer-checked:rotate-90 peer-checked:shadow-xl peer-checked:bg-primary-focus" aria-label="Toggle Floating Menu">
+            <span class="open-icon"><Star className="h-5 w-5" /></span> {/* Use Move icon for closed state */}
+            <span class="close-icon hidden"><X className="h-5 w-5" /></span> {/* Use X icon for open state */}
+        </label>
+
+        <!-- 菜单内容 - 优化布局和响应式 -->
+        <div class="collapse-content p-2 bg-base-200 rounded-box shadow-md w-auto min-w-[48px]"> {/* min-width to prevent collapse */}
+            <div class="menu-items-container flex flex-col gap-2 md:flex-col"> {/* Default vertical, md:flex-col keeps it vertical */}
+                {/* 返回顶部按钮 */}
+                {showScrollTop && (
+                    <button id="scroll-top-btn" class="btn btn-circle btn-sm bg-base-100 border-base-300 shadow hover:shadow-md transition-shadow tooltip tooltip-left" data-tip="返回顶部" aria-label="Scroll to Top">
+                        <ChevronUp className="h-5 w-5" />
+                    </button>
+                )}
+
+                {/* 主题切换优化 - 使用 data-theme 和 localStorage */}
+                {showThemeSwitcher && (
+                    <div class="theme-switcher-group btn-group btn-group-vertical md:btn-group-vertical"> {/* Default vertical */}
+                        {availableThemes.map((theme) => (
+                            <button
+                                class="theme-btn btn btn-xs bg-base-100 border-base-300 shadow hover:shadow-md transition-shadow tooltip tooltip-left"
+                                data-tip={theme.label}
+                                data-theme-value={theme.value}
+                                aria-label={`Switch to ${theme.label} theme`}
+                            >
+                                {React.createElement(moduleIcons[theme.icon as keyof typeof moduleIcons], { className: "h-4 w-4" })}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
+                {/* 模块导航优化 - 按钮尺寸调整 */}
+                {showModuleNav && modules.length > 0 && (
+                    <div class="module-nav-group btn-group btn-group-vertical md:btn-group-vertical"> {/* Default vertical */}
+                        {modules.map((module) => (
+                            <button
+                                class="module-link-btn btn btn-xs bg-base-100 border-base-300 shadow hover:shadow-md transition-shadow tooltip tooltip-left"
+                                data-tip={module.title}
+                                data-target={module.id}
+                                aria-label={`Navigate to ${module.title}`}
+                            >
+                                {React.createElement(moduleIcons[module.icon], { className: "h-4 w-4" })}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script define:vars={{ initialThemes: availableThemes.map(t => t.value) }}>
+    document.addEventListener('astro:page-load', () => {
+        const container = document.getElementById('draggable-container');
+        const collapse = document.getElementById('floating-menu-collapse');
+        const checkbox = document.getElementById('menu-toggle-checkbox');
+        const toggleBtn = document.querySelector('.menu-toggle-btn');
+        const openIcon = toggleBtn?.querySelector('.open-icon');
+        const closeIcon = toggleBtn?.querySelector('.close-icon');
+        const scrollTopBtn = document.getElementById('scroll-top-btn');
+        const themeBtns = document.querySelectorAll('.theme-btn');
+        const moduleLinkBtns = document.querySelectorAll('.module-link-btn');
+        const menuItemsContainer = document.querySelector('.menu-items-container');
+
+        let isDragging = false;
+        let startX, startY, initialX, initialY;
+        let currentX = 0, currentY = 0; // Store current position
+
+        // --- 改进的主题处理逻辑 ---
+        // 与Header组件保持一致的主题存储方式
+        const getStoredTheme = () => {
+            try {
+                return localStorage.getItem('theme') || initialThemes[0];
+            } catch (error) {
+                console.error('Error reading theme from localStorage:', error);
+                return initialThemes[0];
+            }
+        };
+        
+        const setStoredTheme = (theme) => {
+            try {
+                localStorage.setItem('theme', theme);
+            } catch (error) {
+                console.error('Error saving theme to localStorage:', error);
+            }
+        };
+
+        const applyTheme = (theme) => {
+            // 设置HTML根元素的data-theme属性
+            document.documentElement.setAttribute('data-theme', theme);
+            
+            // 根据常见暗色主题名称判断是否添加dark类
+            document.documentElement.classList.toggle('dark', 
+                ['dracula', 'synthwave', 'dark', 'night', 'coffee'].includes(theme));
+            
+            // 高亮当前选中的主题按钮
+            themeBtns.forEach(btn => {
+                const themeValue = btn.dataset.themeValue;
+                btn.classList.toggle('btn-active', themeValue === theme);
+                btn.classList.toggle('btn-primary', themeValue === theme);
+            });
+            
+            // 更新header中的theme-controller单选按钮
+            const themeControllers = document.querySelectorAll('input[name="theme-buttons"]');
+            themeControllers.forEach(controller => {
+                if(controller.value === theme) {
+                    controller.checked = true;
+                }
+            });
+            
+            // 强制重新应用样式以确保所有组件正确刷新
+            const bodyElement = document.body;
+            if (bodyElement) {
+                // 添加临时类触发重新布局
+                bodyElement.classList.add('theme-refreshing');
+                
+                // 在下一帧移除临时类触发重新渲染
+                requestAnimationFrame(() => {
+                    bodyElement.classList.remove('theme-refreshing');
+                });
+            }
+        };
+
+        // 应用初始主题
+        const currentTheme = getStoredTheme();
+        applyTheme(currentTheme);
+
+        // 主题按钮点击事件
+        themeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const themeValue = btn.dataset.themeValue;
+                if (themeValue) {
+                    applyTheme(themeValue);
+                    setStoredTheme(themeValue);
+                }
+            });
+        });
+
+        // --- 拖拽逻辑优化 ---
+        const handleDragStart = (e) => {
+            if (!container || !toggleBtn?.contains(e.target)) return; // 仅通过主按钮拖动
+
+            isDragging = true;
+            startX = e.clientX || e.touches?.[0].clientX;
+            startY = e.clientY || e.touches?.[0].clientY;
+            const transform = window.getComputedStyle(container).transform;
+            if (transform && transform !== 'none') {
+                const matrix = transform.match(/matrix.*\((.+)\)/);
+                if (matrix && matrix[1]) {
+                    const values = matrix[1].split(', ');
+                    initialX = parseFloat(values[4]) || 0;
+                    initialY = parseFloat(values[5]) || 0;
+                } else {
+                    initialX = 0; initialY = 0;
+                }
+            } else {
+                 initialX = 0; initialY = 0;
+            }
+            container.style.transition = 'none'; // 拖动时禁用过渡效果
+            container.classList.add('dragging');
+        };
+
+        const handleDragging = (e) => {
+            if (!isDragging || !container) return;
+            e.preventDefault();
+
+            const currentClientX = e.clientX || e.touches?.[0].clientX;
+            const currentClientY = e.clientY || e.touches?.[0].clientY;
+            const dx = currentClientX - startX;
+            const dy = currentClientY - startY;
+
+            currentX = initialX + dx;
+            currentY = initialY + dy;
+
+            // 限制位置在视口边界内
+            const rect = container.getBoundingClientRect();
+            const maxX = window.innerWidth - rect.width;
+            const maxY = window.innerHeight - rect.height;
+
+            currentX = Math.max(0 - (rect.left - initialX), Math.min(maxX - (rect.left - initialX), currentX));
+            currentY = Math.max(0 - (rect.top - initialY), Math.min(maxY - (rect.top - initialY), currentY));
+
+            container.style.transform = `translate(${currentX}px, ${currentY}px)`;
+        };
+
+        const handleDragEnd = () => {
+            if (!isDragging || !container) return;
+            isDragging = false;
+            container.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'; // 恢复平滑过渡
+            container.classList.remove('dragging');
+
+            // 靠近边缘时自动吸附
+            const rect = container.getBoundingClientRect();
+            const threshold = 50; // 距离边缘触发吸附的像素数
+            const snapSpeed = '0.2s';
+
+            let finalX = currentX;
+            let finalY = currentY;
+
+            if (rect.left < threshold) finalX = 0 - (rect.left - initialX); // 左侧吸附
+            else if (rect.right > window.innerWidth - threshold) finalX = (window.innerWidth - rect.width) - (rect.left - initialX); // 右侧吸附
+
+            if (rect.top < threshold) finalY = 0 - (rect.top - initialY); // 顶部吸附
+            else if (rect.bottom > window.innerHeight - threshold) finalY = (window.innerHeight - rect.height) - (rect.top - initialY); // 底部吸附
+
+             if (finalX !== currentX || finalY !== currentY) {
+                 container.style.transition = `transform ${snapSpeed} ease-out`;
+                 container.style.transform = `translate(${finalX}px, ${finalY}px)`;
+                 currentX = finalX; // 更新位置
+                 currentY = finalY;
+             }
+        };
+
+        // 添加拖拽事件监听
+        container?.addEventListener('mousedown', handleDragStart);
+        document.addEventListener('mousemove', handleDragging);
+        document.addEventListener('mouseup', handleDragEnd);
+
+        container?.addEventListener('touchstart', handleDragStart, { passive: false });
+        document.addEventListener('touchmove', handleDragging, { passive: false });
+        document.addEventListener('touchend', handleDragEnd);
+
+        // --- 其他功能 ---
+        // 返回顶部
+        scrollTopBtn?.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // 模块导航
+        moduleLinkBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.dataset.target;
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // 导航后关闭菜单(可选)
+                    if (checkbox) checkbox.checked = false;
+                    updateToggleIcon(false);
+                }
+            });
+        });
+
+        // 切换按钮图标变化
+        const updateToggleIcon = (isOpen) => {
+            if (openIcon && closeIcon) {
+                openIcon.classList.toggle('hidden', isOpen);
+                closeIcon.classList.toggle('hidden', !isOpen);
+            }
+        };
+
+        checkbox?.addEventListener('change', (e) => {
+            updateToggleIcon(e.target.checked);
+        });
+        // 初始化图标状态
+        if (checkbox) updateToggleIcon(checkbox.checked);
+
+        // 监听页面主题变化以保持同步
+        document.addEventListener('theme-changed', (e) => {
+            const newTheme = e.detail?.theme;
+            if (newTheme) {
+                applyTheme(newTheme);
+            }
+        });
+    });
+</script>
+
+<style>
+/* 拖动状态 */
+.dragging {
+    opacity: 0.8;
+    z-index: 1000; /* 确保拖动时位于顶层 */
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    /* 小屏幕上使菜单水平显示 */
+    .collapse-content {
+        width: auto; /* 允许内容决定宽度 */
+        min-width: unset; /* 覆盖桌面端最小宽度 */
+        position: fixed; /* 相对于视口定位 */
+        bottom: 7rem; /* 位于主按钮上方 */
+        left: 50%; /* 水平居中 */
+        transform: translateX(-50%); /* 微调中心位置 */
+        padding: 0.5rem;
+    }
+
+    .menu-items-container,
+    .theme-switcher-group,
+    .module-nav-group {
+        flex-direction: row;
+        gap: 0.5rem; /* 调整水平布局的间距 */
+    }
+
+    /* 水平布局的工具提示位置 */
+    .tooltip {
+        --tooltip-offset: 10px; /* 调整偏移量 */
+        &:before {
+            /* 提示文字位置在上方 */
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: var(--tooltip-offset);
+        }
+        &:after {
+             /* 箭头位置在下方 */
+             bottom: 100%;
+             left: 50%;
+             transform: translateX(-50%);
+             margin-bottom: calc(var(--tooltip-offset) - 5px); /* 调整箭头位置 */
+             border-color: var(--tooltip-color) transparent transparent transparent; /* 箭头指向下方 */
+        }
+    }
+
+    /* 确保折叠内容在按钮上方打开 */
+    .collapse:has(input:checked) .collapse-content {
+        max-height: 20rem; /* 根据需要调整最大高度 */
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0) translateX(-50%); /* 修正水平布局的变换 */
+        transition: transform 0.3s ease-out, opacity 0.3s ease-out, max-height 0.3s ease-out;
+    }
+}
+
+/* 折叠过渡平滑 */
+.collapse-content {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    transform: translateY(10px); /* 初始位置略低 */
+}
+
+.collapse:has(input:checked) .collapse-content {
+    max-height: 20rem; /* 内容的足够高度 */
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.menu-toggle-btn .open-icon,
+.menu-toggle-btn .close-icon {
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* 主题按钮激活状态 */
+.theme-btn.btn-active {
+    box-shadow: 0 0 0 2px hsl(var(--p));
+    transform: scale(1.1);
+}
+</style>

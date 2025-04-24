@@ -1,0 +1,62 @@
+---
+interface Props {
+  repo: string;
+  repoId: string;
+  category: string;
+  categoryId: string;
+  mapping: string;
+  term?: string;
+  reactionsEnabled?: boolean;
+  emitMetadata?: boolean;
+  inputPosition?: 'top' | 'bottom';
+  theme?: string;
+  lang?: string;
+  loading?: 'lazy' | 'eager';
+  showTitle?: boolean;
+  title?: string;
+}
+
+const {
+  repo,
+  repoId,
+  category,
+  categoryId,
+  mapping = "pathname",
+  term = "",
+  reactionsEnabled = true,
+  emitMetadata = false,
+  inputPosition = "top",
+  theme = "preferred_color_scheme",
+  lang = "zh-CN",
+  loading = "lazy",
+  showTitle = false,
+  title = "评论"
+} = Astro.props;
+---
+
+<section class="giscus-comments mt-10 pt-8 border-t border-base-300">
+  {showTitle && <h3 class="text-xl font-semibold mb-6">{title}</h3>}
+  <script
+    src="https://giscus.app/client.js"
+    data-repo={repo}
+    data-repo-id={repoId}
+    data-category={category}
+    data-category-id={categoryId}
+    data-mapping={mapping}
+    data-term={term}
+    data-reactions-enabled={reactionsEnabled ? "1" : "0"}
+    data-emit-metadata={emitMetadata ? "1" : "0"}
+    data-input-position={inputPosition}
+    data-theme={theme}
+    data-lang={lang}
+    data-loading={loading}
+    crossorigin="anonymous"
+    async
+  ></script>
+</section>
+
+<style>
+  .giscus-comments {
+    width: 100%;
+  }
+</style> 

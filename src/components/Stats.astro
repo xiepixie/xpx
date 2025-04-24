@@ -1,0 +1,13 @@
+---
+import StatsReact from './react/Stats.tsx'
+import type { StatsProps } from './react/Stats.tsx' // Import the props type
+
+// Re-exporting Props for type safety and potential use in Astro pages
+export interface Props {
+    id?: string;
+}
+
+const { id = "" } = Astro.props;
+---
+
+<StatsReact  client:visible />

@@ -1,0 +1,125 @@
+---
+import KeywordCloudReact from './react/KeywordCloud.tsx'
+import { getCollection } from 'astro:content'
+
+// 获取博客文章集合
+const allBlogPosts = await getCollection('blog')
+
+// 从博客文章中提取所有标签并计算每个标签的文章数量
+const tagCounts = allBlogPosts.reduce(
+    (acc, post) => {
+        if (!post.data.tags) return acc
+
+        post.data.tags.forEach((tag) => {
+            if (!acc[tag]) {
+                acc[tag] = 1
+            } else {
+                acc[tag] += 1
+            }
+        })
+
+        return acc
+    },
+    {} as Record<string, number>
+)
+
+// 转换为KeywordCloud组件所需的格式
+const tagsData = Object.entries(tagCounts).map(([tag, count]) => ({
+    id: tag.toLowerCase().replace(/\s+/g, '-'),
+    label: tag,
+    count: count,
+}))
+
+// 如果没有任何标签，提供一些示例标签
+const sampleTags = [
+    { id: 'technology', label: 'Technology', count: 3 },
+    { id: 'marketing', label: 'Marketing', count: 2 },
+    { id: 'design', label: 'Design', count: 4 },
+    { id: 'seo', label: 'SEO', count: 1 },
+    { id: 'content', label: 'Content', count: 5 },
+    { id: 'social-media', label: 'Social Media', count: 2 },
+    { id: 'analytics', label: 'Analytics', count: 1 },
+    { id: 'blogging', label: 'Blogging', count: 6 },
+    { id: 'writing', label: 'Writing', count: 3 },
+    { id: 'productivity', label: 'Productivity', count: 2 },
+    { id: 'business', label: 'Business', count: 4 },
+    { id: 'strategy', label: 'Strategy', count: 2 },
+]
+
+// 使用实际标签或示例标签
+const tags = tagsData.length > 0 ? tagsData : sampleTags
+
+// Props for the Astro wrapper component
+export interface Props {
+    keywords?: Array<{
+        text: string;
+        weight: number; // 1-5, where 5 is the highest
+        link?: string;
+    }>;
+    title?: string;
+    description?: string;
+    id?: string;
+    baseUrl?: string
+}
+const {
+    title = "热门关键词",
+    description = "探索我们博客中的热门话题和标签",
+    keywords = [
+        { text: "JavaScript", weight: 5, link: "/blog/tag/javascript" },
+        { text: "React", weight: 4, link: "/blog/tag/react" },
+        { text: "CSS", weight: 3, link: "/blog/tag/css" },
+        { text: "HTML", weight: 3, link: "/blog/tag/html" },
+        { text: "TypeScript", weight: 4, link: "/blog/tag/typescript" },
+        { text: "Node.js", weight: 4, link: "/blog/tag/nodejs" },
+        { text: "API", weight: 2, link: "/blog/tag/api" },
+        { text: "Astro", weight: 5, link: "/blog/tag/astro" },
+        { text: "性能优化", weight: 3, link: "/blog/tag/performance" },
+        { text: "SEO", weight: 3, link: "/blog/tag/seo" },
+        { text: "响应式设计", weight: 2, link: "/blog/tag/responsive" },
+        { text: "静态站点", weight: 2, link: "/blog/tag/static-site" },
+        { text: "安全", weight: 1, link: "/blog/tag/security" },
+        { text: "前端", weight: 4, link: "/blog/tag/frontend" },
+        { text: "后端", weight: 3, link: "/blog/tag/backend" },
+        { text: "用户体验", weight: 2, link: "/blog/tag/ux" },
+        { text: "设计", weight: 2, link: "/blog/tag/design" },
+
+    ],
+    baseUrl = '/blog/tag',
+    id = ""
+} = Astro.props;
+// 根据权重返回适当的类名
+function getTagClass(weight: number) {
+    switch(weight) {
+        case 5:
+            return "text-xl md:text-2xl font-bold text-primary";
+        case 4:
+            return "text-lg md:text-xl font-semibold text-secondary";
+        case 3:
+            return "text-base md:text-lg font-medium text-accent";
+        case 2:
+            return "text-sm md:text-base text-base-content/80";
+        case 1:
+        default:
+            return "text-xs md:text-sm text-base-content/60";
+    }
+}
+---
+
+<section id={id} class="card bg-base-100 shadow-xl p-6 border border-base-300 rounded-box">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold">{title}</h2>
+        <p class="text-muted-foreground">{description}</p>
+    </div>
+    
+    <div class="flex flex-wrap gap-2 justify-center p-4">
+        {keywords.map(keyword => (
+            <a 
+                href={keyword.link || '#'} 
+                class={`tag ${getTagClass(keyword.weight)} px-3 py-1.5 rounded-full bg-base-200 hover:bg-base-300 transition-colors`}
+            >
+                {keyword.text}
+            </a>
+        ))}
+    </div>
+</section>
+<KeywordCloudReact tags={tags} baseUrl={baseUrl} client:load />

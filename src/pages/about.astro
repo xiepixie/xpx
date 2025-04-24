@@ -1,62 +1,113 @@
 ---
-import Layout from '../layouts/BlogPost.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FloatingMenu from '../components/FloatingMenu.astro';
+import "../styles/global.css";
+
+const pageTitle = "关于我们";
+const pageDescription = "了解我们的团队和使命";
 ---
 
-<Layout
-	title="About Me"
-	description="Lorem ipsum dolor sit amet"
-	pubDate={new Date('August 08 2021')}
-	heroImage="/blog-placeholder-about.jpg"
->
-	<p>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-		labore et dolore magna aliqua. Vitae ultricies leo integer malesuada nunc vel risus commodo
-		viverra. Adipiscing enim eu turpis egestas pretium. Euismod elementum nisi quis eleifend quam
-		adipiscing. In hac habitasse platea dictumst vestibulum. Sagittis purus sit amet volutpat. Netus
-		et malesuada fames ac turpis egestas. Eget magna fermentum iaculis eu non diam phasellus
-		vestibulum lorem. Varius sit amet mattis vulputate enim. Habitasse platea dictumst quisque
-		sagittis. Integer quis auctor elit sed vulputate mi. Dictumst quisque sagittis purus sit amet.
-	</p>
-
-	<p>
-		Morbi tristique senectus et netus. Id semper risus in hendrerit gravida rutrum quisque non
-		tellus. Habitasse platea dictumst quisque sagittis purus sit amet. Tellus molestie nunc non
-		blandit massa. Cursus vitae congue mauris rhoncus. Accumsan tortor posuere ac ut. Fringilla urna
-		porttitor rhoncus dolor. Elit ullamcorper dignissim cras tincidunt lobortis. In cursus turpis
-		massa tincidunt dui ut ornare lectus. Integer feugiat scelerisque varius morbi enim nunc.
-		Bibendum neque egestas congue quisque egestas diam. Cras ornare arcu dui vivamus arcu felis
-		bibendum. Dignissim suspendisse in est ante in nibh mauris. Sed tempus urna et pharetra pharetra
-		massa massa ultricies mi.
-	</p>
-
-	<p>
-		Mollis nunc sed id semper risus in. Convallis a cras semper auctor neque. Diam sit amet nisl
-		suscipit. Lacus viverra vitae congue eu consequat ac felis donec. Egestas integer eget aliquet
-		nibh praesent tristique magna sit amet. Eget magna fermentum iaculis eu non diam. In vitae
-		turpis massa sed elementum. Tristique et egestas quis ipsum suspendisse ultrices. Eget lorem
-		dolor sed viverra ipsum. Vel turpis nunc eget lorem dolor sed viverra. Posuere ac ut consequat
-		semper viverra nam. Laoreet suspendisse interdum consectetur libero id faucibus. Diam phasellus
-		vestibulum lorem sed risus ultricies tristique. Rhoncus dolor purus non enim praesent elementum
-		facilisis. Ultrices tincidunt arcu non sodales neque. Tempus egestas sed sed risus pretium quam
-		vulputate. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Fringilla
-		urna porttitor rhoncus dolor purus non. Amet dictum sit amet justo donec enim.
-	</p>
-
-	<p>
-		Mattis ullamcorper velit sed ullamcorper morbi tincidunt. Tortor posuere ac ut consequat semper
-		viverra. Tellus mauris a diam maecenas sed enim ut sem viverra. Venenatis urna cursus eget nunc
-		scelerisque viverra mauris in. Arcu ac tortor dignissim convallis aenean et tortor at. Curabitur
-		gravida arcu ac tortor dignissim convallis aenean et tortor. Egestas tellus rutrum tellus
-		pellentesque eu. Fusce ut placerat orci nulla pellentesque dignissim enim sit amet. Ut enim
-		blandit volutpat maecenas volutpat blandit aliquam etiam. Id donec ultrices tincidunt arcu. Id
-		cursus metus aliquam eleifend mi.
-	</p>
-
-	<p>
-		Tempus quam pellentesque nec nam aliquam sem. Risus at ultrices mi tempus imperdiet. Id porta
-		nibh venenatis cras sed felis eget velit. Ipsum a arcu cursus vitae. Facilisis magna etiam
-		tempor orci eu lobortis elementum. Tincidunt dui ut ornare lectus sit. Quisque non tellus orci
-		ac. Blandit libero volutpat sed cras. Nec tincidunt praesent semper feugiat nibh sed pulvinar
-		proin gravida. Egestas integer eget aliquet nibh praesent tristique magna.
-	</p>
-</Layout>
+<BaseLayout title={pageTitle} description={pageDescription}>
+	<main class="container mx-auto px-4 py-8">
+		<div class="prose prose-lg mx-auto">
+			<h1 class="text-3xl sm:text-4xl font-bold mb-8">关于我们</h1>
+			
+			<div class="space-y-6">
+				<section id="mission">
+					<h2 class="text-2xl font-semibold">我们的使命</h2>
+					<p>
+						我们致力于创建高质量、易于理解的技术内容，帮助开发者和设计师提升技能，跟上行业最新发展。我们相信知识共享和开源精神，希望通过我们的平台为技术社区做出贡献。
+					</p>
+				</section>
+				
+				<section id="team">
+					<h2 class="text-2xl font-semibold">我们的团队</h2>
+					<p>
+						我们的团队由经验丰富的开发者、设计师和内容创作者组成，他们在各自领域都有深厚的专业知识和实践经验。团队成员来自不同的背景，带来多元化的视角和创新思维。
+					</p>
+					
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+						<div class="card bg-base-100 shadow-xl">
+							<figure class="px-6 pt-6">
+								<img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" alt="团队成员" class="rounded-xl h-48 w-full object-cover" />
+							</figure>
+							<div class="card-body">
+								<h3 class="card-title">张小明</h3>
+								<p class="text-sm text-base-content/70">创始人 & 首席技术官</p>
+								<p>10年全栈开发经验，热爱分享技术知识和最佳实践。</p>
+							</div>
+						</div>
+						
+						<div class="card bg-base-100 shadow-xl">
+							<figure class="px-6 pt-6">
+								<img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" alt="团队成员" class="rounded-xl h-48 w-full object-cover" />
+							</figure>
+							<div class="card-body">
+								<h3 class="card-title">李晓华</h3>
+								<p class="text-sm text-base-content/70">内容总监</p>
+								<p>专注于创建易于理解的技术教程和深度分析文章。</p>
+							</div>
+						</div>
+						
+						<div class="card bg-base-100 shadow-xl">
+							<figure class="px-6 pt-6">
+								<img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" alt="团队成员" class="rounded-xl h-48 w-full object-cover" />
+							</figure>
+							<div class="card-body">
+								<h3 class="card-title">王大力</h3>
+								<p class="text-sm text-base-content/70">UI/UX 设计师</p>
+								<p>专注于创建美观且用户友好的数字体验。</p>
+							</div>
+						</div>
+					</div>
+				</section>
+				
+				<section id="contact">
+					<h2 class="text-2xl font-semibold">联系我们</h2>
+					<p>
+						我们欢迎您的反馈和建议。如果您有任何问题或合作意向，请随时联系我们。
+					</p>
+					
+					<div class="card bg-base-100 shadow-xl mt-6">
+						<div class="card-body">
+							<form class="space-y-4">
+								<div class="form-control">
+									<label class="label">
+										<span class="label-text">您的姓名</span>
+									</label>
+									<input type="text" placeholder="请输入您的姓名" class="input input-bordered" />
+								</div>
+								
+								<div class="form-control">
+									<label class="label">
+										<span class="label-text">电子邮箱</span>
+									</label>
+									<input type="email" placeholder="请输入您的电子邮箱" class="input input-bordered" />
+								</div>
+								
+								<div class="form-control">
+									<label class="label">
+										<span class="label-text">留言内容</span>
+									</label>
+									<textarea class="textarea textarea-bordered h-24" placeholder="请输入您的留言内容"></textarea>
+								</div>
+								
+								<div class="form-control mt-6">
+									<button class="btn btn-primary">发送留言</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</section>
+			</div>
+		</div>
+	</main>
+	
+	<FloatingMenu 
+		modules={[
+			{ id: 'mission', title: '使命', icon: 'BookOpen' },
+			{ id: 'team', title: '团队', icon: 'BarChart3' },
+			{ id: 'contact', title: '联系', icon: 'Calendar' },
+		]}
+	/>
+</BaseLayout>

@@ -1,0 +1,32 @@
+---
+// src/components/NotebookKanban.astro
+// This component is fully interactive, so we'll render the React component directly.
+import NotebookKanbanReact from './react/NotebookKanban.tsx'
+import '../styles/global.css'
+
+export interface Props {
+    // 是否显示状态切换按钮
+    showStatusButtons?: boolean
+    // 最大显示已发布项目数量
+    maxPublishedItems?: number
+    // 指定初始状态
+    initialStatus?: 'Draft' | 'In Review' | 'Published'
+    title?: string;
+    description?: string;
+    id?: string;
+}
+
+const {
+    showStatusButtons = true,
+    maxPublishedItems = 10,
+    initialStatus = 'Draft',
+    title = "看板任务",
+    description = "跟踪和管理您的写作任务",
+    id = ""
+} = Astro.props
+---
+
+<NotebookKanbanReact
+    client:load
+/>
+

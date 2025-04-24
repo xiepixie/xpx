@@ -50,9 +50,9 @@ Any static assets, like images, can be placed in the `public/` directory.
 
 All commands are run from the root of the project, from a terminal:
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `bun install`             | Installs dependencies                            |
+| Command               | Action                                           |
+| :-------------------- | :----------------------------------------------- |
+| `bun install`         | Installs dependencies                            |
 | `bun dev`             | Starts local dev server at `localhost:4321`      |
 | `bun build`           | Build your production site to `./dist/`          |
 | `bun preview`         | Preview your build locally, before deploying     |
@@ -66,3 +66,81 @@ Check out [our documentation](https://docs.astro.build) or jump into our [Discor
 ## Credit
 
 This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+
+# xpx_blog
+
+个人博客网站项目，基于Astro构建。
+
+## 项目特点
+
+- 基于Astro框架开发
+- 使用DaisyUI组件库和Tailwind CSS实现响应式设计
+- 支持明暗主题切换
+- 集成Giscus评论系统
+- 自动部署到GitHub Pages
+
+## 本地开发
+
+### 安装依赖
+
+```bash
+npm install
+```
+
+### 启动开发服务器
+
+```bash
+npm run dev
+```
+
+### 构建项目
+
+```bash
+npm run build
+```
+
+### 预览构建结果
+
+```bash
+npm run preview
+```
+
+## 部署指南
+
+本项目已配置GitHub Actions自动部署到GitHub Pages。
+
+### 部署步骤
+
+1. **Fork或克隆本仓库**
+2. **更新astro.config.mjs中的配置**
+   ```js
+   site: 'https://<你的用户名>.github.io',
+   base: '/<你的仓库名>',
+   ```
+3. **推送代码到GitHub**
+4. **配置GitHub Pages**
+   - 进入仓库Settings > Pages
+   - 将Source设置为GitHub Actions
+
+### 使用自定义域名
+
+1. **更新public/CNAME文件**，填入你的域名
+2. **配置DNS**，在域名提供商处添加CNAME记录指向`<你的用户名>.github.io`
+3. **等待DNS生效**，通常需要几分钟到几小时
+
+## 主要功能
+
+- 博客文章展示与分类
+- 事件日历与时间线
+- 响应式设计，支持移动设备
+- 明暗主题切换
+- 评论系统
+- 联系表单
+
+## 技术栈
+
+- [Astro](https://astro.build/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [DaisyUI](https://daisyui.com/)
+- [Lucide Icons](https://lucide.dev/)
+- [Giscus](https://giscus.app/)

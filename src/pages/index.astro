@@ -1,49 +1,111 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Hero from '../components/Hero.astro';
+import Stats from '../components/Stats.astro';
+import NotebookKanban from '../components/NotebookKanban.astro';
+import KeywordCloud from '../components/KeywordCloud.astro';
+import EventCalendar from '../components/EventCalendar.astro';
+import FloatingMenu from '../components/FloatingMenu.astro';
+import "../styles/global.css"
+const pageTitle = "Blog Homepage";
 ---
-
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This
-				template serves as a lightweight, minimally-styled starting point for anyone looking to build
-				a personal website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
-		</main>
-		<Footer />
-	</body>
-</html>
+<BaseLayout title={pageTitle}>
+	<main class="container mx-auto px-4 py-8">
+		<div class="flex flex-col gap-12">
+			<Hero id="hero" aria-label="Hero section" />
+			
+			<NotebookKanban id="notebook-kanban" aria-label="Notebook kanban board" />
+			<KeywordCloud id="keyword-cloud" aria-label="Keyword cloud visualization" />
+			
+			<EventCalendar 
+				aria-label="Event calendar" 
+				title="Upcoming Events"
+				description="Stay updated with our content calendar"
+				events={[
+					{
+						id: 1,
+						title: 'Content Planning Meeting',
+						date: '2025-04-24',
+						time: '10:00 AM',
+						summary: 'Discussion of next quarter content strategy and planning',
+						url: '/blog/post-1'
+					},
+					{
+						id: 2,
+						title: 'Guest Writer Interview',
+						date: '2023-09-18',
+						time: '2:30 PM',
+						summary: 'Interview with industry expert on latest tech trends',
+						url: '/blog/post-2'
+					},
+					{ 
+						id: 3, 
+						title: 'SEO Workshop', 
+						date: '2023-09-22', 
+						time: '1:00 PM',
+						summary: 'Learn the latest SEO optimization techniques and strategies',
+						url: '/blog/post-3'
+					},
+					{
+						id: 4,
+						title: 'Content Review Session',
+						date: '2023-09-25',
+						time: '11:00 AM',
+						summary: 'Review and optimize the performance of published content',
+						url: '/blog/post-4'
+					},
+					{
+						id: 5,
+						title: 'Editorial Calendar Planning',
+						date: '2023-09-30',
+						time: '3:00 PM',
+						summary: 'Plan content publishing schedule for the next three months',
+						url: '/blog/post-5'
+					},
+				]}
+				blogPosts={[
+					{
+						id: 101,
+						title: "Modern JavaScript Development Practices",
+						date: "2023-09-15",
+						summary: "Explore the latest JavaScript features and best practices to improve development efficiency",
+						url: "/blog/javascript-modern-dev",
+						image: "/images/placeholder-1.jpg"
+					},
+					{
+						id: 102,
+						title: "Website Performance Optimization Guide",
+						date: "2023-09-18",
+						summary: "Comprehensive website performance optimization strategies to enhance user experience and search rankings",
+						url: "/blog/website-performance",
+						image: "/images/placeholder-2.jpg"
+					},
+					{
+						id: 103,
+						title: "Responsive Design Best Practices",
+						date: "2023-09-22",
+						summary: "Create responsive website designs that perform excellently across all devices",
+						url: "/blog/responsive-design",
+						image: "/images/placeholder-3.jpg"
+					}
+				]}
+			/>
+			<Stats id="stats" aria-label="Statistics section" />
+		</div>
+	</main> 
+	
+	{/* Floating menu component */}
+	<FloatingMenu 
+		modules={[
+			{ id: 'hero', title: 'Home', icon: 'BookOpen' },
+			{ id: 'notebook-kanban', title: 'Kanban', icon: 'BarChart3' },
+			{ id: 'event-calendar', title: 'Calendar', icon: 'Calendar' },
+		]}
+		availableThemes={[
+			{ value: 'valentine', label: 'Valentine', icon: 'Sun' },
+			{ value: 'dracula', label: 'Dracula', icon: 'Moon' },
+			{ value: 'winter', label: 'Winter', icon: 'Sun' },
+			{ value: 'synthwave', label: 'Synthwave', icon: 'Moon' },
+		]}
+	/>
+</BaseLayout>

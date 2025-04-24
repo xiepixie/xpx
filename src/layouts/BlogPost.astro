@@ -1,85 +1,109 @@
 ---
-import type { CollectionEntry } from 'astro:content';
-import BaseHead from '../components/BaseHead.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import FormattedDate from '../components/FormattedDate.astro';
+import BaseLayout from './BaseLayout.astro';
+import Giscus from '../components/comments/Giscus.astro';
 
-type Props = CollectionEntry<'blog'>['data'];
+interface Props {
+	title: string;
+	description?: string;
+	publish_date: Date;
+	draft: boolean;
+	update_date?: Date;
+	tags?: string[];
+	seo_image?: string;
+	enableComments?: boolean;
+	children?: any;
+	author?: string;
+	readingTime?: string;
+}
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const { 
+	title, 
+	description, 
+	publish_date, 
+	update_date, 
+	seo_image, 
+	tags = [], 
+	author, 
+	readingTime, 
+	enableComments = true 
+} = Astro.props;
+
+// 格式化日期
+const formattedpublish_date = publish_date.toLocaleDateString('zh-CN', {
+	year: 'numeric',
+	month: 'long',
+	day: 'numeric',
+});
+
+const formattedupdate_date = update_date?.toLocaleDateString('zh-CN', {
+	year: 'numeric',
+	month: 'long',
+	day: 'numeric',
+});
 ---
 
-<html lang="en">
-	<head>
-		<BaseHead title={title} description={description} />
-		<style>
-			main {
-				width: calc(100% - 2em);
-				max-width: 100%;
-				margin: 0;
-			}
-			.hero-image {
-				width: 100%;
-			}
-			.hero-image img {
-				display: block;
-				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
-			}
-			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
-				color: rgb(var(--gray-dark));
-			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
-			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
-			}
-			.date {
-				margin-bottom: 0.5em;
-				color: rgb(var(--gray));
-			}
-			.last-updated-on {
-				font-style: italic;
-			}
-		</style>
-	</head>
+<BaseLayout title={title} description={description}>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.6/dist/katex.min.css"
+		integrity="sha384-ljao5I1l+8KYFXG7R1MEUaxJpAni7uqSgAWn0FFfj4K5l01xjfb'k3/B5pEkXo9h" crossorigin="anonymous" slot="head" />
 
-	<body>
-		<Header />
-		<main>
-			<article>
-				<div class="hero-image">
-					{heroImage && <img width={1020} height={510} src={heroImage} alt="" />}
+	<article class="prose lg:prose-xl dark:prose-invert mx-auto max-w-4xl pt-10 pb-20">
+		{seo_image && (
+			<div class="mb-8 overflow-hidden rounded-lg">
+				<img 
+					src={seo_image} 
+					alt={title} 
+					class="w-full h-auto object-cover aspect-video"
+				/>
+			</div>
+		)}
+
+		<div class="mb-8">
+			<h1 class="font-bold text-3xl md:text-4xl mb-2">{title}</h1>
+
+			<div class="flex flex-wrap items-center text-base-content/70 mb-4 text-sm">
+				{author && (
+					<span class="mr-4">{author}</span>
+				)}
+				<time class="mr-4" datetime={publish_date.toISOString()}>{formattedpublish_date}</time>
+				{readingTime && (
+					<span class="mr-4">{readingTime}</span>
+				)}
+				{update_date && (
+					<span>更新于 <time datetime={update_date.toISOString()}>{formattedupdate_date}</time></span>
+				)}
+			</div>
+
+			{tags.length > 0 && (
+				<div class="flex flex-wrap gap-2 mb-6">
+					{tags.map(tag => (
+						<a href={`/blog/tag/${tag}`} class="badge badge-primary">
+							{tag}
+						</a>
+					))}
 				</div>
-				<div class="prose">
-					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
-						</div>
-						<h1>{title}</h1>
-						<hr />
-					</div>
-					<slot />
-				</div>
-			</article>
-		</main>
-		<Footer />
-	</body>
-</html>
+			)}
+		</div>
+
+		<div class="content">
+			<slot />
+		</div>
+	</article>
+
+	{enableComments && (
+		<Giscus
+			repo="paxie/xpx_blog"
+			repoId="R_kgDOLjm_UQ"
+			category="Comments"
+			categoryId="DIC_kwDOLjm_Uc4Cd5vO"
+			mapping="pathname"
+			term=""
+			reactionsEnabled={true}
+			emitMetadata={false}
+			inputPosition="top"
+			theme="preferred_color_scheme"
+			lang="zh-CN"
+			loading="lazy"
+		/>
+	)}
+</BaseLayout>
+

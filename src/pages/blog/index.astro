@@ -5,82 +5,202 @@ import Footer from '../../components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
 import { getCollection } from 'astro:content';
 import FormattedDate from '../../components/FormattedDate.astro';
+import FloatingMenu from '../../components/FloatingMenu.astro';
 
+// 获取所有博客文章并排序
 const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+	(a, b) => b.data.publish_date.valueOf() - a.data.publish_date.valueOf(),
+);
+
+// 分页实现
+const POSTS_PER_PAGE = 6;
+const currentPage = Number(Astro.url.searchParams.get('page') || '1');
+const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
+const paginatedPosts = posts.slice(
+    (currentPage - 1) * POSTS_PER_PAGE, 
+    currentPage * POSTS_PER_PAGE
 );
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<BaseHead title={`Blog | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
 		<style>
 			main {
-				width: 960px;
-			}
-			ul {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 2rem;
-				list-style-type: none;
-				margin: 0;
-				padding: 0;
-			}
-			ul li {
-				width: calc(50% - 1rem);
-			}
-			ul li * {
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			ul li:first-child {
+				max-width: 1200px;
 				width: 100%;
-				margin-bottom: 1rem;
+				margin: 0 auto;
+				padding: 0 1rem;
+			}
+
+			.page-title {
+				font-size: 2.5rem;
+				font-weight: 700;
+				margin-bottom: 2rem;
 				text-align: center;
+				color: hsl(var(--p));
+				padding-bottom: 1rem;
+				border-bottom: 1px solid hsl(var(--b3));
 			}
-			ul li:first-child img {
+
+			.blog-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+				gap: 2rem;
+				margin-bottom: 3rem;
+			}
+
+			.blog-grid li {
+				list-style-type: none;
+				transition: transform 0.3s ease, box-shadow 0.3s ease;
+				border-radius: 0.75rem;
+				overflow: hidden;
+				background: hsl(var(--b2));
+				border: 1px solid hsl(var(--b3));
+			}
+
+			.blog-grid li:hover {
+				transform: translateY(-5px);
+				box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+			}
+
+			.blog-grid li:first-child {
+				grid-column: 1 / -1;
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 2rem;
+				align-items: center;
+			}
+
+			.blog-grid li:first-child img {
+				height: 350px;
+				object-position: center;
+			}
+
+			.blog-grid li:first-child .content {
+				padding: 2rem;
+			}
+
+			.blog-grid li:first-child .title {
+				font-size: 2rem;
+			}
+
+			.blog-card {
+				height: 100%;
+				display: flex;
+				flex-direction: column;
+			}
+
+			.blog-card img {
 				width: 100%;
+				height: 200px;
+				object-fit: cover;
 			}
-			ul li:first-child .title {
-				font-size: 2.369rem;
+
+			.content {
+				padding: 1.5rem;
+				flex: 1;
+				display: flex;
+				flex-direction: column;
 			}
-			ul li img {
-				margin-bottom: 0.5rem;
-				border-radius: 12px;
-			}
-			ul li a {
-				display: block;
-			}
+
 			.title {
-				margin: 0;
-				color: rgb(var(--black));
-				line-height: 1;
+				margin: 0 0 1rem;
+				font-size: 1.25rem;
+				font-weight: 700;
+				color: hsl(var(--bc));
+				line-height: 1.3;
 			}
+			
 			.date {
 				margin: 0;
-				color: rgb(var(--gray));
+				font-size: 0.875rem;
+				color: hsl(var(--bc) / 0.7);
 			}
-			ul li a:hover h4,
-			ul li a:hover .date {
-				color: rgb(var(--accent));
+
+			.excerpt {
+				margin-top: 1rem;
+				font-size: 0.95rem;
+				color: hsl(var(--bc) / 0.8);
+				line-height: 1.5;
+				flex: 1;
 			}
-			ul a:hover img {
-				box-shadow: var(--box-shadow);
+
+			.read-more {
+				margin-top: 1.5rem;
+				font-weight: 600;
+				color: hsl(var(--p));
+				text-decoration: none;
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				transition: gap 0.3s ease;
 			}
-			@media (max-width: 720px) {
-				ul {
-					gap: 0.5em;
+
+			.read-more:hover {
+				gap: 0.75rem;
+			}
+
+			/* 分页控件样式 */
+			.pagination {
+				display: flex;
+				justify-content: center;
+				margin: 3rem 0;
+				gap: 0.5rem;
+			}
+
+			.pagination-btn {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				height: 2.5rem;
+				min-width: 2.5rem;
+				padding: 0 1rem;
+				border-radius: 0.5rem;
+				font-weight: 500;
+				background: hsl(var(--b2));
+				color: hsl(var(--bc));
+				border: 1px solid hsl(var(--b3));
+				cursor: pointer;
+				transition: all 0.2s ease;
+			}
+
+			.pagination-btn:hover:not(.active, .disabled) {
+				background: hsl(var(--b3));
+			}
+
+			.pagination-btn.active {
+				background: hsl(var(--p));
+				color: hsl(var(--pc));
+				border-color: hsl(var(--pf));
+			}
+
+			.pagination-btn.disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+
+			@media (max-width: 960px) {
+				.blog-grid li:first-child {
+					grid-template-columns: 1fr;
 				}
-				ul li {
-					width: 100%;
-					text-align: center;
+			}
+
+			@media (max-width: 768px) {
+				.page-title {
+					font-size: 2rem;
 				}
-				ul li:first-child {
-					margin-bottom: 0;
+				
+				.blog-grid {
+					grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+					gap: 1.5rem;
 				}
-				ul li:first-child .title {
-					font-size: 1.563em;
+			}
+
+			@media (max-width: 480px) {
+				.blog-grid {
+					grid-template-columns: 1fr;
 				}
 			}
 		</style>
@@ -88,24 +208,74 @@ const posts = (await getCollection('blog')).sort(
 	<body>
 		<Header />
 		<main>
+			<h1 class="page-title">Blog</h1>
+			
 			<section>
-				<ul>
+				<ul class="blog-grid">
 					{
-						posts.map((post) => (
+						paginatedPosts.map((post, index) => (
 							<li>
-								<a href={`/blog/${post.id}/`}>
-									<img width={720} height={360} src={post.data.heroImage} alt="" />
-									<h4 class="title">{post.data.title}</h4>
-									<p class="date">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
+								<a href={`/blog/${post.id}/`} class="blog-card">
+									<img src={post.data.seo_image || '/blog-placeholder-5.jpg'} alt="" />
+									<div class="content">
+										<h2 class="title">{post.data.title}</h2>
+										<p class="date">
+											<FormattedDate date={post.data.publish_date} />
+											{post.data.update_date && post.data.update_date > post.data.publish_date && (
+												<span> · Updated: <FormattedDate date={post.data.update_date} /></span>
+											)}
+										</p>
+										{index === 0 && <p class="excerpt">{post.data.description || '暂无描述'}</p>}
+										<div class="read-more">
+											阅读全文 
+											<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
+										</div>
+									</div>
 								</a>
 							</li>
 						))
 					}
 				</ul>
+				
+				{totalPages > 1 && (
+					<div class="pagination">
+						<a 
+							href={currentPage > 1 ? `?page=${currentPage - 1}` : '#'} 
+							class={`pagination-btn ${currentPage <= 1 ? 'disabled' : ''}`}
+							aria-label="Previous page"
+							aria-disabled={currentPage <= 1}
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+						</a>
+						
+						{Array.from({ length: totalPages }, (_, i) => (
+							<a 
+								href={`?page=${i + 1}`} 
+								class={`pagination-btn ${currentPage === i + 1 ? 'active' : ''}`}
+								aria-label={`Page ${i + 1}`}
+								aria-current={currentPage === i + 1 ? 'page' : undefined}
+							>
+								{i + 1}
+							</a>
+						))}
+						
+						<a 
+							href={currentPage < totalPages ? `?page=${currentPage + 1}` : '#'} 
+							class={`pagination-btn ${currentPage >= totalPages ? 'disabled' : ''}`}
+							aria-label="Next page"
+							aria-disabled={currentPage >= totalPages}
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+						</a>
+					</div>
+				)}
 			</section>
 		</main>
 		<Footer />
+		
+		{/* 添加浮动菜单 */}
+		<FloatingMenu 
+			showModuleNav={false}
+		/>
 	</body>
 </html>

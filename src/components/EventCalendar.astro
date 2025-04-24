@@ -1,0 +1,739 @@
+---
+import { Button } from './react/Button'
+import { Calendar, Clock, ChevronRight, ChevronLeft } from './react/Icons'
+
+interface Event {
+    id: number
+    title: string
+    date: string // Format YYYY-MM-DD
+    time: string
+    summary?: string
+    url?: string
+}
+
+interface BlogPost {
+    id: number
+    title: string
+    date: string
+    summary: string
+    url: string
+    image?: string
+}
+
+export interface Props {
+    title?: string
+    description?: string
+    events?: Event[]
+    blogPosts?: BlogPost[]
+}
+
+const {
+    title: pageTitle = 'Upcoming Events',
+    description: pageDescription = 'Stay updated with our content calendar',
+    events: eventData = [
+        {
+            id: 1,
+            title: 'Content Planning Meeting',
+            date: '2025-04-24',
+            time: '10:00 AM',
+            summary: '讨论下一季度的内容计划和策略',
+            url: '/blog/post-1'
+        },
+        {
+            id: 2,
+            title: 'Guest Writer Interview',
+            date: '2023-09-18',
+            time: '2:30 PM',
+            summary: '与行业专家讨论最新技术趋势',
+            url: '/blog/post-2'
+        },
+        { 
+            id: 3, 
+            title: 'SEO Workshop', 
+            date: '2023-09-22', 
+            time: '1:00 PM',
+            summary: '学习最新的SEO优化技术和策略',
+            url: '/blog/post-3'
+        },
+        {
+            id: 4,
+            title: 'Content Review Session',
+            date: '2023-09-25',
+            time: '11:00 AM',
+            summary: '审核并优化已发布的内容效果',
+            url: '/blog/post-4'
+        },
+        {
+            id: 5,
+            title: 'Editorial Calendar Planning',
+            date: '2023-09-30',
+            time: '3:00 PM',
+            summary: '规划未来三个月的内容发布计划',
+            url: '/blog/post-5'
+        },
+    ],
+    blogPosts = [
+        {
+            id: 101,
+            title: "JavaScript现代化开发实践",
+            date: "2023-09-15",
+            summary: "探索JavaScript最新特性和最佳实践，提高开发效率",
+            url: "/blog/javascript-modern-dev",
+            image: "/images/placeholder-1.jpg"
+        },
+        {
+            id: 102,
+            title: "网站性能优化指南",
+            date: "2023-09-18",
+            summary: "全面的网站性能优化策略，提升用户体验和搜索排名",
+            url: "/blog/website-performance",
+            image: "/images/placeholder-2.jpg"
+        },
+        {
+            id: 103,
+            title: "响应式设计最佳实践",
+            date: "2023-09-22",
+            summary: "打造在各种设备上都表现出色的响应式网站设计",
+            url: "/blog/responsive-design",
+            image: "/images/placeholder-3.jpg"
+        }
+    ]
+} = Astro.props
+
+const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+]
+
+function getFormattedDate(dateString: string) {
+    const date = new Date(dateString + 'T00:00:00')
+    return {
+        day: date.getDate().toString().padStart(2, '0'),
+        month: months[date.getMonth()],
+    }
+}
+
+// 合并 events 和 blogPosts 数据，按日期排序
+const allContentByDate = new Map<string, {events: Event[], blogs: BlogPost[]}>();
+
+// 添加事件数据
+eventData.forEach(event => {
+    if (!allContentByDate.has(event.date)) {
+        allContentByDate.set(event.date, {events: [], blogs: []});
+    }
+    allContentByDate.get(event.date)?.events.push(event);
+});
+
+// 添加博客数据
+blogPosts.forEach(post => {
+    if (!allContentByDate.has(post.date)) {
+        allContentByDate.set(post.date, {events: [], blogs: []});
+    }
+    allContentByDate.get(post.date)?.blogs.push(post);
+});
+
+// 按日期和时间排序事件
+const currentEvents: Event[] = [...eventData].sort((a, b) => {
+    const dateA = new Date(a.date + 'T' + convertTimeTo24Hour(a.time)).getTime();
+    const dateB = new Date(b.date + 'T' + convertTimeTo24Hour(b.time)).getTime();
+    return dateA - dateB;
+});
+
+// 辅助函数：将12小时制时间转换为24小时制
+function convertTimeTo24Hour(timeStr: string): string {
+    if (!timeStr) return '00:00:00';
+    
+    // 匹配时间格式 "10:00 AM" 或 "2:30 PM"
+    const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return '00:00:00';
+    
+    let [_, hour, minute, period] = match;
+    let hourNum = parseInt(hour, 10);
+    
+    // 转换为24小时制
+    if (period.toUpperCase() === 'PM' && hourNum < 12) {
+        hourNum += 12;
+    } else if (period.toUpperCase() === 'AM' && hourNum === 12) {
+        hourNum = 0;
+    }
+    
+    return `${hourNum.toString().padStart(2, '0')}:${minute}:00`;
+}
+---
+
+{/* Import Cally via CDN - Place this in <head> of your layout or here */}
+<script type="module" src="https://unpkg.com/cally" is:inline></script>
+
+<div id="event-calendar" class="mx-auto">
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold mb-2">{pageTitle}</h2>
+        <p class="text-muted-foreground">{pageDescription}</p>
+    </div>
+    
+    {/* Calendar Section */}
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
+        {/* Left Column: Calendar */}
+        <div class="lg:col-span-1 space-y-6 card bg-base-100 shadow-xl p-4 border border-base-300 rounded-box flex flex-col">
+            <h3 class="text-xl font-semibold mb-2">Select Date</h3>
+            <calendar-date
+                id="event-cally"
+                class="cally bg-base-100 border border-base-300 shadow-sm rounded-md w-full max-w-full"
+                first-day-of-week="1"
+                show-outside-days
+            >
+                <svg aria-label="Previous month" class="fill-current size-4 cursor-pointer hover:text-primary" slot="previous" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M15.75 19.5 8.25 12l7.5-7.5"></path></svg>
+                <calendar-month class="font-semibold text-center p-2"></calendar-month>
+                <svg aria-label="Next month" class="fill-current size-4 cursor-pointer hover:text-primary" slot="next" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path></svg>
+            </calendar-date>
+
+            {/* Selected date display */}
+            <div id="selected-date-display" class="text-center text-muted-foreground text-sm mt-2 py-2 px-4 bg-base-200 rounded-md">
+                Please select a date
+            </div>
+        </div>
+
+        {/* Right Column: Content Preview */}
+        <div class="lg:col-span-3 relative">
+            <div id="content-preview" class="card bg-base-100 shadow-xl p-6 border border-base-300 rounded-box min-h-[400px]">
+                {/* Loading State (initially hidden) */}
+                <div id="preview-loading" class="hidden absolute inset-0 bg-base-100 bg-opacity-80 flex items-center justify-center z-10">
+                    <div class="flex flex-col items-center gap-4">
+                        <span class="loading loading-spinner loading-lg text-primary"></span>
+                        <p class="text-base-content/70">Loading content...</p>
+                    </div>
+                </div>
+                
+                {/* No Content Selected State (initial view) */}
+                <div id="preview-empty" class="h-full flex flex-col items-center justify-center text-center p-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-base-content/20 mb-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
+                    <h3 class="text-xl font-semibold mb-2">Please select a date from the calendar</h3>
+                    <p class="text-base-content/70 max-w-md">Select a date to view related content, including scheduled events and blog posts</p>
+                </div>
+
+                {/* Blog Posts Preview (hidden until date selected) */}
+                <div id="preview-content" class="hidden">
+                    <h3 class="text-xl font-semibold mb-6" id="preview-date-title">Selected Date Content</h3>
+                    
+                    {/* Events Section */}
+                    <div id="preview-events" class="mb-8">
+                        <h4 class="font-medium text-lg mb-4">Events</h4>
+                        <div id="events-container" class="space-y-4">
+                            {/* Content will be populated by JavaScript */}
+                        </div>
+                    </div>
+                    
+                    {/* Blog Posts Section */}
+                    <div id="preview-blogs">
+                        <h4 class="font-medium text-lg mb-4">Blog Posts</h4>
+                        <div id="blogs-container" class="space-y-4">
+                            {/* Content will be populated by JavaScript */}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+{/* 水平时间线组件 - 增加高度并优化布局 */}
+<div class="card bg-base-100 shadow-xl p-6 border border-base-300 rounded-box mb-8">
+    <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-semibold">Upcoming Events Timeline</h3>
+        <div class="flex gap-2">
+            <button id="timeline-prev" class="btn btn-circle btn-sm btn-outline btn-primary">
+                <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button id="timeline-next" class="btn btn-circle btn-sm btn-outline btn-primary">
+                <ChevronRight className="h-5 w-5" />
+            </button>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto pb-4">
+        <ul id="vertical-timeline" class="timeline timeline-snap-icon timeline-horizontal max-w-full min-h-[320px]">
+            {currentEvents.length > 0 ? currentEvents.map((event, index) => {
+                const { day, month } = getFormattedDate(event.date);
+                // 通过索引控制左右位置交替
+                const isLeft = index % 2 === 0;
+                return (
+                    <li data-event-date={event.date} class="timeline-item">
+                        {/* 时间线分割线 */}
+                        <hr aria-hidden="true" />
+
+                        <div class="timeline-middle">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+
+                        {/* 内容容器，左右交替 */}
+                        <div class={`${isLeft ? 'timeline-start md:text-end' : 'timeline-end'} content-container transition-all duration-300`}>
+                            <time datetime={`${event.date}T${event.time}`} class="font-mono text-xs text-base-content/70">
+                                {event.date} - {event.time}
+                            </time>
+                            <h3 class="font-bold mt-1">{event.title}</h3>
+                            <p class="text-sm mt-2 line-clamp-2">
+                                {event.summary || "No description available"}
+                            </p>
+                            <a href={event.url || "#"} class="btn btn-primary btn-xs mt-3 self-end" aria-label={`View details for ${event.title}`}>
+                                View Details
+                            </a>
+                        </div>
+
+                        {/* 尾部分割线 */}
+                        <hr aria-hidden="true" />
+                    </li>
+                )
+            }) : (
+                <li class="flex items-center justify-center w-full text-center text-base-content/50 p-8">
+                    No scheduled events
+                </li>
+            )}
+        </ul>
+    </div>
+</div>
+
+{/* Client-side script for Cally interaction and content preview */}
+<script define:vars={{ allContentData: Object.fromEntries(allContentByDate), blogPosts, eventData }}>
+    document.addEventListener('astro:page-load', () => {
+        const calendar = document.getElementById('event-cally');
+        const selectedDateDisplay = document.getElementById('selected-date-display');
+        
+        // 内容预览相关元素
+        const contentPreview = document.getElementById('content-preview');
+        const previewLoading = document.getElementById('preview-loading');
+        const previewEmpty = document.getElementById('preview-empty');
+        const previewContent = document.getElementById('preview-content');
+        const previewDateTitle = document.getElementById('preview-date-title');
+        const eventsContainer = document.getElementById('events-container');
+        const blogsContainer = document.getElementById('blogs-container');
+        
+        // 水平时间线相关元素
+        const verticalTimeline = document.getElementById('vertical-timeline');
+        const timelinePrev = document.getElementById('timeline-prev');
+        const timelineNext = document.getElementById('timeline-next');
+        
+        // 显示加载状态
+        const showLoading = () => {
+            if (previewLoading) previewLoading.classList.remove('hidden');
+            if (previewEmpty) previewEmpty.classList.add('hidden');
+            if (previewContent) previewContent.classList.add('hidden');
+        };
+        
+        // 显示空状态
+        const showEmpty = () => {
+            if (previewLoading) previewLoading.classList.add('hidden');
+            if (previewEmpty) previewEmpty.classList.remove('hidden');
+            if (previewContent) previewContent.classList.add('hidden');
+        };
+        
+        // 显示内容
+        const showContent = () => {
+            if (previewLoading) previewLoading.classList.add('hidden');
+            if (previewEmpty) previewEmpty.classList.add('hidden');
+            if (previewContent) previewContent.classList.remove('hidden');
+        };
+        
+        // 加载日期内容
+        const loadDateContent = (selectedDate) => {
+            // 显示加载状态
+            showLoading();
+            
+            // 模拟加载延迟，实际应用中可能是API调用
+            setTimeout(() => {
+                if (!selectedDate || !allContentData[selectedDate]) {
+                    showEmpty();
+                    return;
+                }
+                
+                const dateContent = allContentData[selectedDate];
+                
+                // 更新日期标题
+                if (previewDateTitle) {
+                    try {
+                        const dateObj = new Date(selectedDate + 'T00:00:00');
+                        const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+                        previewDateTitle.textContent = `Content for ${dateObj.toLocaleDateString('en-US', options)}`;
+                    } catch (err) {
+                        previewDateTitle.textContent = `Content for ${selectedDate}`;
+                    }
+                }
+                
+                // 更新事件列表
+                if (eventsContainer) {
+                    if (dateContent.events && dateContent.events.length > 0) {
+                        eventsContainer.innerHTML = dateContent.events.map(event => `
+                            <div class="p-4 border border-base-300 rounded-lg hover:bg-base-200 transition-colors">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h5 class="font-medium">${event.title}</h5>
+                                        <div class="flex items-center text-sm text-base-content/70 mt-1">
+                                            <span class="inline-block w-4 h-4 mr-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                            </span>
+                                            <span>${event.time}</span>
+                                        </div>
+                                        <p class="mt-2 text-sm">${event.summary || "No description available"}</p>
+                                    </div>
+                                    <a href="${event.url || "#"}" class="btn btn-sm btn-primary">Details</a>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        eventsContainer.innerHTML = '<p class="text-base-content/50 py-2">No events scheduled for this date</p>';
+                    }
+                }
+                
+                // 更新博客列表
+                if (blogsContainer) {
+                    if (dateContent.blogs && dateContent.blogs.length > 0) {
+                        blogsContainer.innerHTML = dateContent.blogs.map(blog => `
+                            <div class="flex gap-4 p-4 border border-base-300 rounded-lg hover:bg-base-200 transition-colors">
+                                ${blog.image ? `
+                                <div class="shrink-0">
+                                    <img src="${blog.image}" alt="${blog.title}" class="w-24 h-24 object-cover rounded-md">
+                                </div>
+                                ` : ''}
+                                <div class="flex-1">
+                                    <h5 class="font-medium">${blog.title}</h5>
+                                    <p class="mt-1 text-sm line-clamp-2">${blog.summary}</p>
+                                    <a href="${blog.url}" class="btn btn-sm btn-outline btn-primary mt-2">Read Article</a>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        blogsContainer.innerHTML = '<p class="text-base-content/50 py-2">No blog posts for this date</p>';
+                    }
+                }
+                
+                // 显示内容
+                showContent();
+                
+            }, 300); // 缩短加载延迟，提升用户体验
+        };
+        
+        // 水平时间线滚动功能优化
+        if (timelinePrev && timelineNext && verticalTimeline) {
+            // 定义滚动距离和动画持续时间
+            const scrollDistance = 300;
+            
+            // 修复滚动按钮功能
+            timelinePrev.addEventListener('click', () => {
+                verticalTimeline.scrollBy({ 
+                    left: -scrollDistance, 
+                    behavior: 'smooth' 
+                });
+            });
+            
+            timelineNext.addEventListener('click', () => {
+                verticalTimeline.scrollBy({ 
+                    left: scrollDistance, 
+                    behavior: 'smooth' 
+                });
+            });
+            
+            // 显示/隐藏滚动按钮
+            const updateScrollButtons = () => {
+                if (!verticalTimeline || !timelinePrev || !timelineNext) return;
+                
+                const isAtStart = verticalTimeline.scrollLeft <= 10;
+                const isAtEnd = verticalTimeline.scrollLeft + verticalTimeline.clientWidth >= verticalTimeline.scrollWidth - 10;
+                
+                timelinePrev.disabled = isAtStart;
+                timelinePrev.classList.toggle('btn-disabled', isAtStart);
+                
+                timelineNext.disabled = isAtEnd;
+                timelineNext.classList.toggle('btn-disabled', isAtEnd);
+            };
+            
+            // 初始化按钮状态
+            setTimeout(updateScrollButtons, 100);
+            
+            // 监听滚动事件更新按钮状态
+            verticalTimeline.addEventListener('scroll', updateScrollButtons);
+            
+            // 窗口调整大小时更新按钮状态
+            window.addEventListener('resize', updateScrollButtons);
+        }
+        
+        // 高亮选中日期事件
+        const highlightTimelineEvents = (selectedDate) => {
+            if (!verticalTimeline) return;
+            
+            const allTimelineItems = verticalTimeline.querySelectorAll('li[data-event-date]');
+            let foundMatch = false;
+            
+            allTimelineItems.forEach(item => {
+                const eventDate = item.getAttribute('data-event-date');
+                if (eventDate === selectedDate) {
+                    item.classList.add('timeline-item-active');
+                    foundMatch = true;
+                    // 滚动到该元素
+                    setTimeout(() => {
+                        item.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    }, 100);
+                } else {
+                    item.classList.remove('timeline-item-active');
+                }
+            });
+            
+            return foundMatch;
+        };
+        
+        // 日历变化事件
+        if (calendar) {
+            // 初始状态
+            showEmpty();
+            
+            // 设置初始日期显示
+            if (selectedDateDisplay) {
+                selectedDateDisplay.textContent = 'Please select a date';
+                selectedDateDisplay.classList.add('bg-base-200');
+            }
+            
+            // 监听日期变化
+            calendar.addEventListener('change', (e) => {
+                const selectedDate = e.target.value; // Format: YYYY-MM-DD
+                
+                // 更新日期显示
+                if (selectedDateDisplay) {
+                    if (selectedDate) {
+                        try {
+                            const dateObj = new Date(selectedDate + 'T00:00:00');
+                            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                            selectedDateDisplay.textContent = `Selected: ${dateObj.toLocaleDateString('en-US', options)}`;
+                            selectedDateDisplay.classList.remove('bg-base-200', 'text-muted-foreground');
+                            selectedDateDisplay.classList.add('bg-primary', 'text-primary-content');
+                        } catch (err) {
+                            selectedDateDisplay.textContent = `Invalid date: ${selectedDate}`;
+                        }
+                    } else {
+                        selectedDateDisplay.textContent = 'Please select a date';
+                        selectedDateDisplay.classList.remove('bg-primary', 'text-primary-content');
+                        selectedDateDisplay.classList.add('bg-base-200', 'text-muted-foreground');
+                    }
+                }
+                
+                // 加载选中日期的内容
+                loadDateContent(selectedDate);
+                
+                // 高亮时间线上的相应事件
+                highlightTimelineEvents(selectedDate);
+            });
+            
+            // 初始化时间线项点击事件 - 改进为更明显的可点击效果
+            document.querySelectorAll('.timeline-item').forEach(item => {
+                // 添加鼠标悬停效果
+                item.classList.add('hover:bg-base-200', 'cursor-pointer', 'transition-all', 'duration-300');
+                
+                item.addEventListener('click', () => {
+                    const eventDate = item.getAttribute('data-event-date');
+                    if (eventDate && calendar) {
+                        // 设置日历值
+                        calendar.value = eventDate;
+                        
+                        // 确保选中状态可见
+                        if (selectedDateDisplay) {
+                            try {
+                                const dateObj = new Date(eventDate + 'T00:00:00');
+                                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                                selectedDateDisplay.textContent = `Selected: ${dateObj.toLocaleDateString('en-US', options)}`;
+                                selectedDateDisplay.classList.remove('bg-base-200', 'text-muted-foreground');
+                                selectedDateDisplay.classList.add('bg-primary', 'text-primary-content');
+                            } catch (err) {
+                                selectedDateDisplay.textContent = `Invalid date: ${eventDate}`;
+                            }
+                        }
+                        
+                        // 手动加载内容
+                        loadDateContent(eventDate);
+                        
+                        // 高亮时间线项
+                        highlightTimelineEvents(eventDate);
+                        
+                        // 滚动到日历部分
+                        const calendarSection = document.getElementById('event-calendar');
+                        if (calendarSection) {
+                            calendarSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }
+                });
+            });
+            
+            // 检查URL参数是否有日期，如果有则自动选中
+            const urlParams = new URLSearchParams(window.location.search);
+            const dateParam = urlParams.get('date');
+            
+            if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+                // 设置日历值
+                calendar.value = dateParam;
+                
+                // 触发日期选择
+                const event = new Event('change', { bubbles: true });
+                calendar.dispatchEvent(event);
+            }
+        }
+    });
+</script>
+
+<style>
+    /* 水平时间线样式 - 优化布局和对齐问题 */
+    .timeline-horizontal {
+        display: flex;
+        overflow-x: auto;
+        padding: 1rem 0;
+        scroll-snap-type: x mandatory;
+        position: relative;
+        min-height: 320px; /* 增加高度确保足够的内容空间 */
+    }
+    
+    .timeline-horizontal > li {
+        flex: 0 0 auto;
+        scroll-snap-align: start;
+        width: 300px;
+        padding: 0 1rem;
+        position: relative;
+    }
+    
+    .timeline-horizontal .timeline-start,
+    .timeline-horizontal .timeline-end {
+        position: relative;
+        padding: 1rem;
+        margin: 1rem 0;
+        width: 250px; /* 固定宽度确保对齐 */
+        border: 1px solid transparent;
+        border-radius: 0.5rem;
+    }
+    
+    /* 修复垂直对齐问题 */
+    .timeline-horizontal .timeline-start {
+        top: -40px; /* 减小偏移量 */
+    }
+    
+    .timeline-horizontal .timeline-end {
+        top: 40px; /* 减小偏移量 */
+    }
+    
+    .timeline-horizontal .timeline-middle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+        background-color: hsl(var(--b1));
+        border: 2px solid hsl(var(--p));
+        border-radius: 50%;
+        padding: 0.25rem;
+    }
+    
+    .timeline-item {
+        position: relative;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    /* 选中项的高亮样式 */
+    .timeline-item-active .content-container {
+        border-color: hsl(var(--p));
+        background-color: hsl(var(--p) / 0.1);
+        box-shadow: 0 0 0 2px hsl(var(--p) / 0.2);
+        transform: scale(1.05);
+    }
+    
+    .timeline-item-active .timeline-middle {
+        transform: translate(-50%, -50%) scale(1.2);
+        background-color: hsl(var(--p) / 0.2);
+    }
+
+    /* 日历样式优化 */
+    .cally {
+        width: 100%;
+        max-width: 100%; 
+        font-size: 0.9rem;
+        --cally-color-brand: hsl(var(--p));
+        --cally-color-brand-emphasis: hsl(var(--pf));
+        --cally-color-background: hsl(var(--b1));
+        --cally-border-radius: 0.5rem;
+        margin: 0 auto;
+    }
+
+    /* 确保日历内部元素样式统一 */
+    :global(.cally calendar-day) {
+        aspect-ratio: 1/1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+    :global(.cally calendar-day[today]) {
+        background-color: hsl(var(--p) / 0.2) !important;
+        color: hsl(var(--pc)) !important;
+        font-weight: bold;
+    }
+
+    :global(.cally calendar-day[selected]) {
+        background-color: hsl(var(--p)) !important;
+        color: hsl(var(--pc)) !important;
+    }
+
+    /* 内容容器样式 */
+    .content-container {
+        border: 1px solid transparent;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    
+    /* 空状态图标居中样式 */
+    #preview-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        height: 100%;
+        min-height: 300px;
+    }
+    
+    #preview-empty svg {
+        margin: 0 auto 1.5rem;
+    }
+    
+    /* 滚动控制按钮样式 */
+    #timeline-prev:disabled,
+    #timeline-next:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    /* 自定义滚动条 */
+    .overflow-x-auto::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-track {
+        background: hsl(var(--b3));
+        border-radius: 3px;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: hsl(var(--p) / 0.5);
+        border-radius: 3px;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+        background: hsl(var(--p));
+    }
+</style>
