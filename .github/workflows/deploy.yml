@@ -4,7 +4,7 @@ on:
   # 每次推送到main分支时触发工作流
   # 如果使用不同的分支名称，请将'main'替换为您的分支名称
   push:
-    branches: [ main ]
+    branches: [ xpx ]
   # 允许从GitHub上的Actions选项卡手动运行此工作流
   workflow_dispatch:
 
