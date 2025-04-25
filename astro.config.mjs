@@ -11,12 +11,36 @@ import rehypeToc from 'rehype-toc';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
+import dotenv from 'dotenv';
+dotenv.config();
 
+// 添加调试输出以验证环境变量加载正确
+console.log('[Config] Environment variables loaded:');
+console.log('[Config] PUBLIC_USE_BASE_PATH:', process.env.PUBLIC_USE_BASE_PATH);
+console.log('[Config] PUBLIC_BASE_PATH:', process.env.PUBLIC_BASE_PATH);
 
-// https://astro.build/config
+// 更健壮的环境变量解析，处理字符串格式的布尔值
+/**
+ * @param {any} value
+ */
+const parseBooleanEnv = (value) => {
+  return value === 'true' || value === true || value === '1';
+};
+
+// 从环境变量中读取配置
+const useBasePath = parseBooleanEnv(process.env.PUBLIC_USE_BASE_PATH);
+const basePath = process.env.PUBLIC_BASE_PATH || '';
+
+console.log('[Config] Parsed values:');
+console.log('[Config] useBasePath:', useBasePath);
+console.log('[Config] basePath:', basePath);
+console.log('[Config] Resulting base:', useBasePath && basePath ? `/${basePath}` : 'undefined');
+
+// 设置Astro配置
 export default defineConfig({
-  site: "https://paxie.github.io/xpx",
-  base: "xpx",
+  site: "https://xiepixie.github.io",
+  // 设置 base 路径 - 如果 PUBLIC_USE_BASE_PATH=true 则使用 PUBLIC_BASE_PATH
+  base: useBasePath && basePath ? `/${basePath}` : undefined,
   output: "static",
   
   markdown: {
@@ -55,11 +79,20 @@ export default defineConfig({
       ],
     }), 
     sitemap(), 
+    // 注意：如果仍有警告，可能需要考虑升级或替换此插件
     image(), 
     react()
   ],
 
   vite: {
     plugins: [tailwindcss()],
+    define: {
+      // 确保这些变量直接可用于客户端 JavaScript，并使用实际值而不是变量引用
+      'import.meta.env.PUBLIC_BASE_PATH': JSON.stringify(process.env.PUBLIC_BASE_PATH || ''),
+      'import.meta.env.PUBLIC_USE_BASE_PATH': JSON.stringify(parseBooleanEnv(process.env.PUBLIC_USE_BASE_PATH)),
+      'import.meta.env.BASE_URL': JSON.stringify(useBasePath && basePath ? `/${basePath}/` : '/'),
+    },
+    // 显式地设置环境变量传递
+    envPrefix: ['PUBLIC_']
   },
 });
