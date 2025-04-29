@@ -1,0 +1,312 @@
+---
+title: 'Expressive Code 功能演示'
+description: '展示 astro-expressive-code 插件的各种高级代码块功能'
+publish_date: '2025-05-01'
+tags: ['代码', '教程', '开发']
+---
+
+# Expressive Code 功能演示
+
+这篇文章展示了使用 astro-expressive-code 插件实现的各种代码块高级功能。
+
+## 基本代码块
+
+最基本的代码块只需要指定语言：
+
+```js
+// 这是一个基本的 JavaScript 代码块
+function greet(name) {
+    console.log(`你好，${name}！`)
+    return `欢迎，${name}！`
+}
+
+greet('访客')
+```
+
+## 代码块标题
+
+通过添加 `title="文件名"` 可以显示代码块的文件名：
+
+```js title="greeting.js"
+// 这个代码块有标题
+function greet(name) {
+    console.log(`你好，${name}！`)
+    return `欢迎，${name}！`
+}
+
+greet('访客')
+```
+
+## 行号显示
+
+通过添加 `showLineNumbers` 可以显示行号：
+
+```js showLineNumbers
+// 这个代码块显示行号
+function greet(name) {
+    console.log(`你好，${name}！`)
+    return `欢迎，${name}！`
+}
+
+greet('访客')
+```
+
+## 高亮特定行
+
+通过添加 `{行号}` 可以高亮特定行：
+
+```js {2-3}
+// 第2-3行被高亮显示
+function greet(name) {
+    console.log(`你好，${name}！`)
+    return `欢迎，${name}！`
+}
+
+greet('访客')
+```
+
+也可以高亮不连续的行：
+
+```js {1,4,6}
+// 第1、4、6行被高亮显示
+function greet(name) {
+    console.log(`你好，${name}！`)
+    return `欢迎，${name}！`
+}
+
+greet('访客')
+```
+
+## 标记为新增的行
+
+通过添加 `ins={行号}` 可以标记新增的行：
+
+```js ins={3}
+function greet(name) {
+    // 记录问候语
+    console.log(`你好，${name}！`) // 这行被标记为新增
+    return `欢迎，${name}！`
+}
+
+greet('访客')
+```
+
+## 标记为删除的行
+
+通过添加 `del={行号}` 可以标记删除的行：
+
+```js del={3}
+function greet(name) {
+    // 记录问候语
+    console.log(`你好，${name}！`) // 这行被标记为删除
+    return `欢迎，${name}！`
+}
+
+greet('访客')
+```
+
+## 同时使用多种标记
+
+可以同时使用多种标记：
+
+```js del={3} ins={4} {6}
+function greet(name) {
+    // 记录问候语
+    console.log(`你好，${name}！`) // 这行被标记为删除
+    console.log(`欢迎来到我们的网站，${name}！`) // 这行被标记为新增
+
+    return `欢迎，${name}！` // 这行被普通高亮
+}
+
+greet('访客')
+```
+
+## 使用差异语法
+
+可以使用类似 Git 差异的语法：
+
+```diff
+function greet(name) {
+  // 记录问候语
+- console.log(`你好，${name}！`);
++ console.log(`欢迎来到我们的网站，${name}！`);
+
+  return `欢迎，${name}！`;
+}
+
+greet('访客');
+```
+
+## 带语法高亮的差异
+
+可以结合语法高亮和差异语法：
+
+```diff lang="js"
+function greet(name) {
+  // 记录问候语
+- console.log(`你好，${name}！`);
++ console.log(`欢迎来到我们的网站，${name}！`);
+
+  return `欢迎，${name}！`;
+}
+
+greet('访客');
+```
+
+## 命令行代码块
+
+命令行代码块会有特殊的样式：
+
+```bash title="终端"
+# 安装依赖
+npm install astro-expressive-code
+
+# 启动开发服务器
+npm run dev
+```
+
+```powershell title="PowerShell"
+# 切换目录
+cd my-project
+
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev
+```
+
+## 带有 ANSI 颜色的终端输出
+
+支持 ANSI 颜色的终端输出：
+
+```ansi
+[1;34mInfo:[0m 正在启动应用...
+[1;32mSuccess:[0m 服务器已启动
+[1;33mWarning:[0m 内存使用率超过75%
+[1;31mError:[0m 无法连接到数据库
+```
+
+## 不同编程语言的代码块
+
+### HTML
+
+```html title="index.html"
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>示例页面</title>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <h1>你好，世界！</h1>
+        <p>这是一个示例页面。</p>
+
+        <script src="script.js"></script>
+    </body>
+</html>
+```
+
+### CSS
+
+```css title="styles.css"
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    color: #333;
+}
+
+h1 {
+    color: #0066cc;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+p {
+    margin-bottom: 20px;
+}
+```
+
+### TypeScript
+
+```ts title="greeter.ts"
+interface Person {
+    firstName: string
+    lastName: string
+}
+
+class Student implements Person {
+    fullName: string
+
+    constructor(
+        public firstName: string,
+        public lastName: string
+    ) {
+        this.fullName = `${firstName} ${lastName}`
+    }
+}
+
+function greet(person: Person): string {
+    return `你好，${person.firstName} ${person.lastName}！`
+}
+
+const user = new Student('张', '三')
+console.log(greet(user))
+```
+
+### Python
+
+```python title="fibonacci.py"
+def fibonacci(n: int) -> int:
+    """计算斐波那契数列的第n项"""
+    if n <= 1:
+        return n
+    else:
+        return fibonacci(n-1) + fibonacci(n-2)
+
+# 测试函数
+if __name__ == "__main__":
+    for i in range(10):
+        print(f"fibonacci({i}) = {fibonacci(i)}")
+```
+
+### JSON
+
+```json title="config.json"
+{
+    "name": "my-project",
+    "version": "1.0.0",
+    "description": "一个示例项目",
+    "main": "index.js",
+    "scripts": {
+        "dev": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview"
+    },
+    "dependencies": {
+        "astro": "^3.0.0",
+        "astro-expressive-code": "^0.26.0"
+    }
+}
+```
+
+## 总结
+
+astro-expressive-code 插件提供了丰富的代码块功能：
+
+1. **语法高亮** - 支持多种编程语言
+2. **代码块标题** - 显示文件名
+3. **行号显示** - 方便引用特定行
+4. **行高亮** - 高亮重要的代码行
+5. **新增/删除标记** - 标记代码变更
+6. **差异语法** - 类似 Git 差异的显示方式
+7. **命令行样式** - 为不同的命令行工具提供专门样式
+8. **复制按钮** - 方便复制代码
+9. **主题适配** - 自动适应网站的明暗主题
+
+这些功能使代码展示更加直观、美观，提升了技术博客的专业性和可读性。

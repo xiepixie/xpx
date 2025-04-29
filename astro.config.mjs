@@ -3,7 +3,7 @@ import { defineConfig } from "astro/config";
 import mdx from "@astrojs/mdx";
 import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
-import image from "@astrojs/image";
+import sharp from "@astrojs/sharp";
 import react from "@astrojs/react";
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -79,8 +79,8 @@ export default defineConfig({
       ],
     }), 
     sitemap(), 
-    // 注意：如果仍有警告，可能需要考虑升级或替换此插件
-    image(), 
+    // 替换成更新的sharp图像处理集成
+    sharp(), 
     react()
   ],
 

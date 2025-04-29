@@ -1,0 +1,50 @@
+---
+/**
+ * 字体加载组件
+ *
+ * 这个组件会在页面头部添加字体定义，
+ * 使用 getPath() 函数确保字体 URL 包含正确的基础路径前缀。
+ */
+
+import { getPath } from '../lib/path'
+
+// 字体文件路径
+const atkinsonRegularPath = getPath('fonts/atkinson-regular.woff')
+const atkinsonBoldPath = getPath('fonts/atkinson-bold.woff')
+---
+
+<!-- 字体预加载 -->
+<link
+    rel="preload"
+    href={atkinsonRegularPath}
+    as="font"
+    type="font/woff"
+    crossorigin
+/>
+<link
+    rel="preload"
+    href={atkinsonBoldPath}
+    as="font"
+    type="font/woff"
+    crossorigin
+/>
+
+<!-- 内联字体样式 -->
+<style is:inline define:vars={{ atkinsonRegularPath, atkinsonBoldPath }}>
+    /* 字体定义 - 使用变量确保路径正确 */
+    @font-face {
+        font-family: 'Atkinson';
+        src: url(var(--atkinsonRegularPath)) format('woff');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Atkinson';
+        src: url(var(--atkinsonBoldPath)) format('woff');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+    }
+</style>
