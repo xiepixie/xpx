@@ -1,0 +1,119 @@
+---
+import { getPath } from '../lib/path'
+
+interface Props {
+    src: string
+    alt: string
+    class?: string
+    sizes?: string
+    widths?: number[]
+    aspectRatio?: string
+    loading?: 'lazy' | 'eager'
+    decoding?: 'async' | 'sync' | 'auto'
+}
+
+const {
+    src,
+    alt,
+    class: className = '',
+    sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
+    widths = [320, 640, 960, 1280, 1600],
+    aspectRatio = '16/9',
+    loading = 'lazy',
+    decoding = 'async',
+} = Astro.props
+
+// 处理图片路径 - 确保使用正确的基础路径
+const imageSrc = src.startsWith('http') ? src : getPath(src)
+console.log(
+    `[ResponsiveImage] Original src: ${src}, Processed src: ${imageSrc}`
+)
+
+// 生成 srcset
+function generateSrcSet(src: string, widths: number[]) {
+    if (src.startsWith('http')) {
+        // 对于外部图片，我们不能生成不同尺寸的版本
+        return ''
+    }
+
+    try {
+        // 获取文件扩展名
+        const extension = src.split('.').pop() || 'jpg'
+
+        // 移除扩展名的基础路径
+        const basePath = src.substring(0, src.lastIndexOf('.'))
+
+        // 检查是否是有效的图片路径
+        if (!basePath || !extension) {
+            console.warn(`Invalid image path: ${src}`)
+            return ''
+        }
+
+        // 由于我们发现图片路径有问题，这里不再生成srcset
+        // 直接返回空字符串，使用原始图片
+        return ''
+
+        /* 原始srcset生成代码，暂时注释掉
+    return widths
+      .map(width => `${getPath(`${basePath}-${width}.${extension}`)} ${width}w`)
+      .join(', ');
+    */
+    } catch (error) {
+        console.error(`Error generating srcset for ${src}:`, error)
+        return ''
+    }
+}
+
+// 添加错误处理
+let srcset = ''
+try {
+    srcset = generateSrcSet(src, widths)
+} catch (error) {
+    console.error(`Failed to generate srcset for ${src}:`, error)
+}
+---
+
+<div
+    class={`responsive-image-container ${className}`}
+    style={`aspect-ratio: ${aspectRatio};`}
+>
+    <img
+        src={imageSrc}
+        alt={alt}
+        loading={loading}
+        decoding={decoding}
+        class="w-full h-full object-cover"
+        sizes={sizes}
+        onerror="this.onerror=null; this.src=window.location.origin + import.meta.env.BASE_URL + 'blog-placeholder-5.jpg';"
+    />
+</div>
+
+<script define:vars={{ src, imageSrc }}>
+    // 调试信息
+    console.log(`[Image Debug] Original: ${src}`)
+    console.log(`[Image Debug] Processed: ${imageSrc}`)
+    console.log(`[Image Debug] BASE_URL: ${import.meta.env.BASE_URL}`)
+</script>
+
+<style>
+    .responsive-image-container {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        background-color: hsl(var(--b3));
+    }
+
+    .responsive-image-container img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .responsive-image-container:hover img {
+        transform: scale(1.05);
+    }
+</style>

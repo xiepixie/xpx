@@ -1,0 +1,103 @@
+---
+title: '测试MDX代码块样式'
+description: '测试MDX文件中的代码块样式'
+publish_date: '2025-04-28'
+draft: false
+tags: ['测试', '代码块', 'MDX']
+---
+
+# 测试MDX代码块样式
+
+这个页面用于测试MDX文件中的代码块样式是否正确应用，并且能够随主题变化而变化。
+
+## 基本代码块
+
+```js
+function demo() {
+    console.log('这是一个基本的代码块')
+    return 'Hello World'
+}
+```
+
+## 带有标题的代码块
+
+```js title="demo.js"
+function demo() {
+    console.log('这个代码块有标题')
+    return 'Hello World'
+}
+```
+
+## 带有行号的代码块
+
+```js showLineNumbers
+function demo() {
+    console.log('这个代码块显示行号')
+    return 'Hello World'
+}
+```
+
+## 高亮特定行的代码块
+
+```js {2}
+function demo() {
+    console.log('这一行被高亮显示')
+    return 'Hello World'
+}
+```
+
+## 标记为插入的行
+
+```js ins={2}
+function demo() {
+    console.log('这一行被标记为插入')
+    return 'Hello World'
+}
+```
+
+## 标记为删除的行
+
+```js del={2}
+function demo() {
+    console.log('这一行被标记为删除')
+    return 'Hello World'
+}
+```
+
+## 带有行标签的代码块
+
+```js {"这是一个标签":2}
+function demo() {
+    console.log('这一行有一个标签')
+    return 'Hello World'
+}
+```
+
+## 终端代码块
+
+```bash title="终端示例"
+echo "这是一个终端代码块"
+cd /path/to/project
+npm install
+```
+
+## 差异代码块
+
+```diff
++ 这一行被添加
+- 这一行被删除
+  这一行没有变化
+```
+
+## 带有语法高亮的差异代码块
+
+```diff lang="js"
+  function demo() {
+-   console.log('旧代码');
++   console.log('新代码');
+-   sssss
++   dsadasdasdas
++   sdadsad
+    return 'Hello World';
+  }
+```

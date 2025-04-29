@@ -1,0 +1,201 @@
+---
+interface Props {
+    articleId: string
+}
+
+const { articleId } = Astro.props
+---
+
+<div class="article-feedback mt-12 pt-8 border-t border-base-300">
+    <h3 class="text-xl font-bold mb-4">这篇文章对您有帮助吗？</h3>
+
+    <div class="flex flex-col sm:flex-row gap-6">
+        <div class="rating-container">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="text-sm text-base-content/70">文章评分：</span>
+                <div class="rating rating-md">
+                    <input
+                        type="radio"
+                        name="rating-2"
+                        class="mask mask-star-2 bg-orange-400"
+                        value="1"
+                        data-article-id={articleId}
+                    />
+                    <input
+                        type="radio"
+                        name="rating-2"
+                        class="mask mask-star-2 bg-orange-400"
+                        value="2"
+                        data-article-id={articleId}
+                    />
+                    <input
+                        type="radio"
+                        name="rating-2"
+                        class="mask mask-star-2 bg-orange-400"
+                        value="3"
+                        data-article-id={articleId}
+                    />
+                    <input
+                        type="radio"
+                        name="rating-2"
+                        class="mask mask-star-2 bg-orange-400"
+                        value="4"
+                        data-article-id={articleId}
+                    />
+                    <input
+                        type="radio"
+                        name="rating-2"
+                        class="mask mask-star-2 bg-orange-400"
+                        value="5"
+                        data-article-id={articleId}
+                    />
+                </div>
+                <span class="rating-value text-sm text-base-content/70 ml-2"
+                ></span>
+            </div>
+        </div>
+
+        <div class="feedback-container flex-1">
+            <div class="mb-4">
+                <textarea
+                    id="feedback-text"
+                    class="textarea textarea-bordered w-full"
+                    placeholder="您的反馈和建议（可选）"
+                    rows="3"
+                    data-article-id={articleId}></textarea>
+            </div>
+            <div class="flex justify-end">
+                <button id="submit-feedback" class="btn btn-primary">
+                    提交反馈
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="feedback-result" class="mt-4 hidden">
+        <div class="alert alert-success">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="stroke-current shrink-0 h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path></svg
+            >
+            <span>感谢您的反馈！我们将不断改进内容质量。</span>
+        </div>
+    </div>
+</div>
+
+<script define:vars={{ articleId }}>
+    // 在页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        const ratingInputs = document.querySelectorAll('.rating input')
+        const ratingValue = document.querySelector('.rating-value')
+        const feedbackText = document.getElementById('feedback-text')
+        const submitButton = document.getElementById('submit-feedback')
+        const feedbackResult = document.getElementById('feedback-result')
+
+        // 从本地存储中获取之前的评分
+        const storedRating = localStorage.getItem(`article-rating-${articleId}`)
+        if (storedRating) {
+            // 设置之前的评分
+            const ratingInput = document.querySelector(
+                `.rating input[value="${storedRating}"]`
+            )
+            if (ratingInput) {
+                ratingInput.checked = true
+                ratingValue.textContent = `${storedRating}/5`
+            }
+        }
+
+        // 监听评分变化
+        ratingInputs.forEach((input) => {
+            input.addEventListener('change', (e) => {
+                const value = e.target.value
+                ratingValue.textContent = `${value}/5`
+
+                // 保存评分到本地存储
+                localStorage.setItem(`article-rating-${articleId}`, value)
+
+                // 可以在这里发送评分到服务器
+                // sendRatingToServer(articleId, value);
+            })
+        })
+
+        // 提交反馈
+        submitButton.addEventListener('click', () => {
+            const rating =
+                document.querySelector('.rating input:checked')?.value || 0
+            const feedback = feedbackText.value.trim()
+
+            if (rating || feedback) {
+                // 在这里可以发送反馈到服务器
+                // sendFeedbackToServer(articleId, rating, feedback);
+
+                // 显示成功消息
+                feedbackResult.classList.remove('hidden')
+
+                // 如果有反馈文本，清空文本框
+                if (feedback) {
+                    feedbackText.value = ''
+
+                    // 保存反馈到本地存储
+                    localStorage.setItem(
+                        `article-feedback-${articleId}`,
+                        feedback
+                    )
+                }
+
+                // 3秒后隐藏成功消息
+                setTimeout(() => {
+                    feedbackResult.classList.add('hidden')
+                }, 3000)
+            }
+        })
+
+        // 从本地存储中获取之前的反馈
+        const storedFeedback = localStorage.getItem(
+            `article-feedback-${articleId}`
+        )
+        if (storedFeedback) {
+            feedbackText.value = storedFeedback
+        }
+    })
+
+    // 发送评分到服务器的函数（示例）
+    function sendRatingToServer(articleId, rating) {
+        // 这里可以使用 fetch API 发送数据到服务器
+        console.log(`发送评分：文章ID=${articleId}，评分=${rating}`)
+
+        // 示例：
+        // fetch('/api/rating', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify({ articleId, rating }),
+        // });
+    }
+
+    // 发送反馈到服务器的函数（示例）
+    function sendFeedbackToServer(articleId, rating, feedback) {
+        // 这里可以使用 fetch API 发送数据到服务器
+        console.log(
+            `发送反馈：文章ID=${articleId}，评分=${rating}，反馈=${feedback}`
+        )
+
+        // 示例：
+        // fetch('/api/feedback', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify({ articleId, rating, feedback }),
+        // });
+    }
+</script>

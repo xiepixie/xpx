@@ -1,0 +1,341 @@
+/* 博客内容增强样式 */
+
+/* 基础内容样式 */
+.content {
+  line-height: 1.8;
+  font-size: 1.05rem;
+}
+
+/* 标题样式 */
+.content h1,
+.content h2,
+.content h3,
+.content h4,
+.content h5,
+.content h6 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: hsl(var(--bc));
+  scroll-margin-top: 100px;
+}
+
+.content h1 {
+  font-size: 2.25rem;
+  border-bottom: 1px solid hsl(var(--b3));
+  padding-bottom: 0.5rem;
+}
+
+.content h2 {
+  font-size: 1.875rem;
+  border-bottom: 1px solid hsl(var(--b3) / 0.5);
+  padding-bottom: 0.3rem;
+}
+
+.content h3 {
+  font-size: 1.5rem;
+}
+
+.content h4 {
+  font-size: 1.25rem;
+}
+
+.content h5 {
+  font-size: 1.125rem;
+}
+
+.content h6 {
+  font-size: 1rem;
+}
+
+/* 段落样式 */
+.content p {
+  margin-bottom: 1.5rem;
+}
+
+/* 列表样式 */
+.content ul,
+.content ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.content ul {
+  list-style-type: disc;
+}
+
+.content ol {
+  list-style-type: decimal;
+}
+
+.content li {
+  margin-bottom: 0.5rem;
+}
+
+.content li > ul,
+.content li > ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* 引用块样式 */
+.content blockquote {
+  position: relative;
+  border-left: 4px solid hsl(var(--p));
+  margin-left: 0;
+  margin-right: 0;
+  margin-bottom: 1.5rem;
+  font-style: italic;
+  color: hsl(var(--bc) / 0.9);
+  background-color: hsl(var(--b1) / 0.3);
+  padding: 1.25rem 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.content blockquote::before {
+  content: "\201C";
+  position: absolute;
+  top: -0.5rem;
+  left: 0.5rem;
+  font-size: 3rem;
+  color: hsl(var(--p) / 0.2);
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+.content blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* 引用块中的引用来源 */
+.content blockquote cite {
+  display: block;
+  font-style: normal;
+  font-weight: 500;
+  margin-top: 0.75rem;
+  font-size: 0.9em;
+  color: hsl(var(--bc) / 0.7);
+  text-align: right;
+}
+
+/* 注释样式 */
+.content blockquote strong:first-child {
+  display: block;
+  font-style: normal;
+  margin-bottom: 0.5rem;
+  color: hsl(var(--bc));
+  font-weight: 600;
+}
+
+/* 表格样式 */
+.content table {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  border-collapse: collapse;
+}
+
+.content th {
+  background-color: hsl(var(--b2));
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem;
+  border: 1px solid hsl(var(--b3));
+}
+
+.content td {
+  padding: 0.75rem;
+  border: 1px solid hsl(var(--b3));
+}
+
+.content tr:nth-child(even) {
+  background-color: hsl(var(--b1) / 0.3);
+}
+
+/* 链接样式 */
+.content a {
+  color: hsl(var(--p));
+  text-decoration: none;
+  border-bottom: 1px dashed hsl(var(--p) / 0.5);
+  transition: all 0.2s ease;
+}
+
+.content a:hover {
+  color: hsl(var(--pf));
+  border-bottom: 1px solid hsl(var(--pf));
+}
+
+/* 图片样式 */
+.content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* 水平线样式 */
+.content hr {
+  margin: 2rem 0;
+  border: 0;
+  height: 1px;
+  background-image: linear-gradient(to right, hsl(var(--b3) / 0), hsl(var(--b3)), hsl(var(--b3) / 0));
+}
+
+/* 代码样式 - 内联代码 */
+.content code:not(pre code) {
+  background-color: hsl(var(--p) / 0.1);
+  color: hsl(var(--p));
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 0.875em;
+}
+
+/* 键盘按键样式 */
+.content kbd {
+  display: inline-block;
+  padding: 0.2em 0.4em;
+  font-size: 0.85em;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+  line-height: 1;
+  color: hsl(var(--bc));
+  background-color: hsl(var(--b2));
+  border: 1px solid hsl(var(--b3));
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 0 hsl(var(--b3));
+  margin: 0 0.2em;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* 标记文本样式 */
+.content mark {
+  background-color: hsl(var(--wa) / 0.2);
+  color: inherit;
+  padding: 0.1em 0.2em;
+  border-radius: 0.2rem;
+}
+
+/* 缩写样式 */
+.content abbr {
+  text-decoration: underline dotted;
+  cursor: help;
+  border-bottom: 1px dotted hsl(var(--bc) / 0.5);
+}
+
+/* 上标和下标样式 */
+.content sub,
+.content sup {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.content sup {
+  top: -0.5em;
+}
+
+.content sub {
+  bottom: -0.25em;
+}
+
+/* 暗色模式调整 */
+[data-theme="dark"] .content blockquote {
+  background-color: hsl(var(--b2) / 0.3);
+}
+
+[data-theme="dark"] .content tr:nth-child(even) {
+  background-color: hsl(var(--b2) / 0.2);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .content {
+    font-size: 1rem;
+  }
+
+  .content h1 {
+    font-size: 1.875rem;
+  }
+
+  .content h2 {
+    font-size: 1.5rem;
+  }
+
+  .content h3 {
+    font-size: 1.25rem;
+  }
+
+  .content h4 {
+    font-size: 1.125rem;
+  }
+
+  .content h5, .content h6 {
+    font-size: 1rem;
+  }
+}
+
+/* 阅读进度条样式 */
+#reading-progress-container {
+  height: 3px;
+  background-color: transparent;
+  z-index: 100;
+}
+
+#reading-progress-bar {
+  background-color: hsl(var(--p));
+  height: 100%;
+  width: 0;
+  transition: width 0.1s ease;
+}
+
+/* 图片模态框样式 */
+.overflow-hidden {
+  overflow: hidden !important;
+}
+
+/* 打印样式优化 */
+@media print {
+  .content {
+    font-size: 12pt;
+  }
+
+  .content a {
+    color: #000;
+    text-decoration: underline;
+    border-bottom: none;
+  }
+
+  .content blockquote,
+  .content pre {
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+  }
+
+  .content img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  .content h2,
+  .content h3 {
+    page-break-after: avoid;
+  }
+
+  .content p,
+  .content h2,
+  .content h3 {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* 隐藏打印时不需要的元素 */
+  #reading-progress-container,
+  #back-to-top,
+  .toc-toggle-btn {
+    display: none !important;
+  }
+}

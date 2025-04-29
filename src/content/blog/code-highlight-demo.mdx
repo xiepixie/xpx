@@ -1,0 +1,248 @@
+---
+title: '代码高亮功能演示'
+description: '展示 astro-expressive-code 插件支持的各种代码高亮功能'
+publish_date: '2024-07-01'
+update_date: '2025-04-27'
+seo_image: '/blog-placeholder-3.jpg'
+tags: ['代码', '示例', '高亮']
+---
+
+# 代码高亮功能演示
+
+这篇文章展示了我们博客现在支持的各种代码高亮功能。使用 `astro-expressive-code` 插件，我们可以让代码块更加丰富和直观。
+
+## 基本代码块
+
+在Markdown中，你可以使用三个反引号（\`\`\`）来创建代码块。例如：
+
+````
+\```js
+function sayHello() {
+  console.log("你好，世界！");
+}
+\```
+````
+
+这会生成如下代码块：
+
+```js
+function sayHello() {
+    console.log('你好，世界！')
+}
+```
+
+## 支持的编程语言
+
+我们的代码高亮支持多种编程语言，以下是一些常见的语言标识符：
+
+- `js` 或 `javascript` - JavaScript
+- `ts` 或 `typescript` - TypeScript
+- `jsx` - React JSX
+- `tsx` - React TSX
+- `html` - HTML
+- `css` - CSS
+- `python` - Python
+- `ruby` - Ruby
+- `go` - Go
+- `rust` - Rust
+- `java` - Java
+- `c` - C
+- `cpp` - C++
+- `csharp` 或 `cs` - C#
+- `php` - PHP
+- `bash` 或 `sh` - Shell 脚本
+- `sql` - SQL
+- `json` - JSON
+- `yaml` 或 `yml` - YAML
+- `markdown` 或 `md` - Markdown
+- `diff` - 差异对比
+
+以下是更多语言的示例：
+
+```python
+def fibonacci(n):
+    """计算斐波那契数列的第n项"""
+    if n <= 1:
+        return n
+    else:
+        return fibonacci(n-1) + fibonacci(n-2)
+
+print(fibonacci(10))  # 输出: 55
+```
+
+```css
+/* 自适应卡片样式 */
+.card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+@media (max-width: 768px) {
+    .card {
+        padding: 12px;
+    }
+}
+```
+
+## 高级功能
+
+### 代码行号
+
+代码行号会自动添加，帮助读者更容易地参考特定代码行。
+
+### 文件名显示
+
+通过在语言标识符后添加`title="文件名"`，你可以显示代码的文件名：
+
+````
+\```js title="app.js"
+// 你的代码
+\```
+````
+
+效果如下：
+
+```js title="app.js"
+import express from 'express'
+const app = express()
+const port = process.env.PORT || 3000
+
+app.get('/', (req, res) => {
+    res.send('Hello World!')
+})
+
+app.listen(port, () => {
+    console.log(`服务器运行在 http://localhost:${port}`)
+})
+```
+
+### 代码行高亮
+
+你可以通过在语言标识符后添加`{行号}`来高亮特定的代码行：
+
+````
+\```js {3-5}
+// 这会高亮第3-5行
+\```
+````
+
+效果如下：
+
+```js {3-5}
+function processData(data) {
+    // 检查数据
+    if (!data || typeof data !== 'object') {
+        throw new Error('无效数据格式')
+    }
+
+    // 处理数据
+    const result = {
+        ...data,
+        timestamp: new Date().toISOString(),
+        processed: true,
+    }
+
+    return result
+}
+```
+
+你也可以高亮多个不连续的行：
+
+````
+\```js {2, 6-7, 10}
+// 这会高亮第2行、第6-7行和第10行
+\```
+````
+
+效果如下：
+
+```js {2, 6-7, 10}
+class UserService {
+    constructor(database) {
+        this.db = database
+        this.users = []
+    }
+    async findAll() {
+        return await this.db.query('SELECT * FROM users')
+    }
+
+    async findById(id) {
+        return await this.db.query('SELECT * FROM users WHERE id = ?', [id])
+    }
+
+    async create(user) {
+        const result = await this.db.query('INSERT INTO users SET ?', user)
+        return result.insertId
+    }
+}
+```
+
+### 组合使用
+
+你可以同时使用文件名和行高亮功能：
+
+````
+\```js title="auth.js" {2-3, 7}
+// 代码...
+\```
+````
+
+效果如下：
+
+```js title="auth.js" {2-3, 7}
+function authenticate(req, res, next) {
+    const token = req.headers.authorization?.split(' ')[1]
+    if (!token) return res.status(401).json({ message: '未提供授权令牌' })
+
+    try {
+        // 验证令牌
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        req.user = decoded
+        next()
+    } catch (error) {
+        return res.status(401).json({ message: '无效的授权令牌' })
+    }
+}
+```
+
+```js title="auth.js" {1,2,3, 7}
+function authenticate(req, res, next) {
+    const token = req.headers.authorization?.split(' ')[1]
+    if (!token) return res.status(401).json({ message: '未提供授权令牌' })
+
+    try {
+        // 验证令牌
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        req.user = decoded
+        next()
+    } catch (error) {
+        return res.status(401).json({ message: '无效的授权令牌' })
+    }
+}
+```
+
+## 自适应主题
+
+最精彩的部分是，所有代码块会自动适应网站的明暗主题！尝试切换主题，看看代码高亮如何随之变化。
+
+## 复制代码按钮
+
+每个代码块的右上角都有一个复制按钮，用户只需点击一下即可复制代码，非常方便。
+
+## 终端 ANSI 颜色支持
+
+我们也支持终端 ANSI 颜色的渲染：
+
+```ansi
+[1;34mInfo:[0m 正在启动应用...
+[1;32mSuccess:[0m 服务器已启动
+[1;33mWarning:[0m 内存使用率超过75%
+[1;31mError:[0m 无法连接到数据库
+```

@@ -1,0 +1,138 @@
+---
+title: '代码块功能测试'
+description: '测试代码块的高级功能'
+publish_date: '2025-04-28'
+tags: ['测试', '代码块']
+---
+
+# 代码块高级功能测试
+
+这个页面用于测试我们实现的代码块高级功能，包括行号、文件名显示、代码行高亮和复制按钮。
+
+## 基本代码块
+
+```js
+function sayHello() {
+    console.log('你好，世界！')
+    return 'Hello World!'
+}
+
+sayHello()
+```
+
+## 带文件名的代码块
+
+```js title="hello.js"
+function sayHello() {
+    console.log('你好，世界！')
+    return 'Hello World!'
+}
+
+sayHello()
+```
+
+## 带行高亮的代码块
+
+```js {2-3}
+function sayHello() {
+    console.log('你好，世界！')
+    return 'Hello World!'
+}
+
+sayHello()
+```
+
+## 带不连续行高亮的代码块
+
+```js {1, 4, 6}
+function sayHello() {
+    console.log('你好，世界！')
+    return 'Hello World!'
+}
+
+sayHello()
+```
+
+## 同时带文件名和行高亮的代码块
+
+```js title="app.js" {2, 5}
+import express from 'express'
+const app = express()
+const port = process.env.PORT || 3000
+
+app.get('/', (req, res) => {
+    res.send('Hello World!')
+})
+
+app.listen(port, () => {
+    console.log(`服务器运行在 http://localhost:${port}`)
+})
+```
+
+## 不同语言的代码块
+
+### HTML
+
+```html title="index.html"
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>测试页面</title>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <h1>你好，世界！</h1>
+        <p>这是一个测试页面。</p>
+
+        <script src="script.js"></script>
+    </body>
+</html>
+```
+
+### CSS
+
+```css title="styles.css" {5-8}
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+h1 {
+    color: #0066cc;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+p {
+    margin-bottom: 20px;
+}
+```
+
+### Python
+
+```python title="fibonacci.py" {1, 7-8}
+def fibonacci(n):
+    """计算斐波那契数列的第n项"""
+    if n <= 1:
+        return n
+    else:
+        return fibonacci(n-1) + fibonacci(n-2)
+
+print(fibonacci(10))  # 输出: 55
+print(fibonacci(20))  # 输出: 6765
+```
+
+## 测试主题切换
+
+尝试切换网站的主题，看看代码块的样式如何随之变化。代码块应该会自动适应明亮和暗黑主题。
+
+## 测试复制按钮
+
+每个代码块的右上角都应该有一个复制按钮，鼠标悬停在代码块上时会显示。点击按钮可以复制代码。

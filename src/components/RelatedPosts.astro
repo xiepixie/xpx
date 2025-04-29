@@ -1,0 +1,107 @@
+---
+import { getCollection } from 'astro:content'
+import FormattedDate from './FormattedDate.astro'
+import { getPath } from '../lib/path'
+
+interface Props {
+    currentPostId: string
+    tags: string[]
+    maxPosts?: number
+}
+
+const { currentPostId, tags = [], maxPosts = 3 } = Astro.props
+
+// 获取所有博客文章
+const allPosts = await getCollection('blog')
+
+// 过滤掉当前文章
+const otherPosts = allPosts.filter((post) => post.id !== currentPostId)
+
+// 计算每篇文章与当前文章的标签匹配度
+const postsWithRelevance = otherPosts.map((post) => {
+    const postTags = post.data.tags || []
+    // 计算共同标签数量
+    const commonTags = tags.filter((tag) => postTags.includes(tag))
+    return {
+        post,
+        relevance: commonTags.length,
+    }
+})
+
+// 按相关性排序，相关性相同时按发布日期排序
+postsWithRelevance.sort((a, b) => {
+    if (b.relevance !== a.relevance) {
+        return b.relevance - a.relevance
+    }
+    return (
+        b.post.data.publish_date.valueOf() - a.post.data.publish_date.valueOf()
+    )
+})
+
+// 获取最相关的文章
+const relatedPosts = postsWithRelevance
+    .filter((item) => item.relevance > 0) // 只显示至少有一个共同标签的文章
+    .slice(0, maxPosts)
+    .map((item) => item.post)
+
+// 如果相关文章不足，添加最新文章补充
+if (relatedPosts.length < maxPosts) {
+    const recentPosts = otherPosts
+        .filter((post) => !relatedPosts.some((rp) => rp.id === post.id))
+        .sort(
+            (a, b) =>
+                b.data.publish_date.valueOf() - a.data.publish_date.valueOf()
+        )
+        .slice(0, maxPosts - relatedPosts.length)
+
+    relatedPosts.push(...recentPosts)
+}
+---
+
+{
+    relatedPosts.length > 0 && (
+        <div class="related-posts mt-12 pt-8 border-t border-base-300">
+            <h3 class="text-xl font-bold mb-6">相关文章</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {relatedPosts.map((post) => (
+                    <a
+                        href={getPath(`blog/${post.id}/`)}
+                        class="card bg-base-200 hover:bg-base-300 transition-colors shadow-sm"
+                    >
+                        {post.data.seo_image && (
+                            <figure class="h-40 overflow-hidden">
+                                <img
+                                    src={getPath(post.data.seo_image)}
+                                    alt={post.data.title}
+                                    class="w-full h-full object-cover"
+                                />
+                            </figure>
+                        )}
+                        <div class="card-body p-4">
+                            <h4 class="card-title text-base line-clamp-2">
+                                {post.data.title}
+                            </h4>
+                            <p class="text-sm text-base-content/70 mb-2">
+                                <FormattedDate date={post.data.publish_date} />
+                            </p>
+                            {post.data.tags && post.data.tags.length > 0 && (
+                                <div class="flex flex-wrap gap-1 mt-2">
+                                    {post.data.tags.slice(0, 2).map((tag) => (
+                                        <span class="badge badge-sm badge-primary">
+                                            {tag}
+                                        </span>
+                                    ))}
+                                    {post.data.tags.length > 2 && (
+                                        <span class="badge badge-sm">
+                                            +{post.data.tags.length - 2}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </a>
+                ))}
+            </div>
+        </div>
+    )
+}

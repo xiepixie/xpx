@@ -1,0 +1,141 @@
+---
+import { getPath } from '../lib/path'
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts'
+
+interface Props {
+    title: string
+    description?: string
+    image?: string
+    type?: 'website' | 'article' | 'profile'
+    publishDate?: Date | string
+    updateDate?: Date | string
+    author?: string
+    tags?: string[]
+    canonicalURL?: URL | string
+}
+
+const {
+    title,
+    description = SITE_DESCRIPTION,
+    image = '/blog-placeholder-1.jpg',
+    type = 'website',
+    publishDate,
+    updateDate,
+    author = 'XPX Blog',
+    tags = [],
+    canonicalURL = Astro.url,
+} = Astro.props
+
+// 处理图片路径
+const imageUrl = image.startsWith('http')
+    ? image
+    : new URL(
+          getPath(image.startsWith('/') ? image.slice(1) : image),
+          Astro.site
+      ).toString()
+
+// 处理规范URL
+const canonicalURLString =
+    canonicalURL instanceof URL
+        ? canonicalURL.toString()
+        : new URL(canonicalURL, Astro.site).toString()
+
+// 格式化日期为ISO格式
+const formatDate = (date: Date | string | undefined) => {
+    if (!date) return undefined
+    const dateObj = typeof date === 'string' ? new Date(date) : date
+    return dateObj.toISOString()
+}
+
+const publishDateISO = formatDate(publishDate)
+const updateDateISO = formatDate(updateDate)
+
+// 构建结构化数据
+const structuredData =
+    type === 'article'
+        ? {
+              '@context': 'https://schema.org',
+              '@type': 'Article',
+              headline: title,
+              description: description,
+              image: imageUrl,
+              author: {
+                  '@type': 'Person',
+                  name: author,
+              },
+              publisher: {
+                  '@type': 'Organization',
+                  name: SITE_TITLE,
+                  logo: {
+                      '@type': 'ImageObject',
+                      url: new URL('/favicon.svg', Astro.site).toString(),
+                  },
+              },
+              url: canonicalURLString,
+              datePublished: publishDateISO,
+              dateModified: updateDateISO || publishDateISO,
+              keywords: tags.join(', '),
+          }
+        : type === 'profile'
+          ? {
+                '@context': 'https://schema.org',
+                '@type': 'ProfilePage',
+                name: title,
+                description: description,
+                image: imageUrl,
+                mainEntity: {
+                    '@type': 'Person',
+                    name: author,
+                },
+            }
+          : {
+                '@context': 'https://schema.org',
+                '@type': 'WebSite',
+                name: SITE_TITLE,
+                description: SITE_DESCRIPTION,
+                url: Astro.site?.toString(),
+            }
+---
+
+<!-- 基本元标签 -->
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="author" content={author} />
+{tags.length > 0 && <meta name="keywords" content={tags.join(', ')} />}
+
+<!-- 规范链接 -->
+<link rel="canonical" href={canonicalURLString} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonicalURLString} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={imageUrl} />
+{
+    publishDateISO && (
+        <meta property="article:published_time" content={publishDateISO} />
+    )
+}
+{
+    updateDateISO && (
+        <meta property="article:modified_time" content={updateDateISO} />
+    )
+}
+{tags.map((tag) => <meta property="article:tag" content={tag} />)}
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={canonicalURLString} />
+<meta property="twitter:title" content={title} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={imageUrl} />
+
+<!-- 结构化数据 -->
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+<!-- 其他元标签 -->
+<meta name="robots" content="index, follow" />
+<meta name="googlebot" content="index, follow" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content={Astro.generator} />

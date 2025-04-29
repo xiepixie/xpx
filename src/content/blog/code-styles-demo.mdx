@@ -1,0 +1,424 @@
+---
+title: '代码样式演示'
+description: '这篇文章展示了不同编程语言和代码高亮功能的示例'
+publish_date: '2025-04-28'
+update_date: '2025-04-28'
+tags: ['programming', 'tutorial']
+seo_image: '/blog-placeholder-3.jpg'
+---
+
+# 代码高亮样式演示
+
+这篇文章展示了各种编程语言的代码高亮效果，以及特殊功能如行号、代码行高亮、文件名显示等。所有这些功能会根据网站的主题（明亮/暗黑）自动调整样式。
+
+## JavaScript 示例
+
+```js
+// 简单的 JavaScript 函数
+function greeting(name) {
+    return `你好，${name}！`
+}
+
+// 使用箭头函数
+const add = (a, b) => a + b
+
+// 类
+class Person {
+    constructor(name, age) {
+        this.name = name
+        this.age = age
+    }
+
+    sayHello() {
+        console.log(`你好，我是 ${this.name}，今年 ${this.age} 岁`)
+    }
+}
+
+const person = new Person('张三', 25)
+person.sayHello() // 输出: 你好，我是 张三，今年 25 岁
+```
+
+## TypeScript 示例
+
+```ts title="user.model.ts" {5-8}
+// 用户接口定义
+interface User {
+    id: number
+    name: string
+    email: string // 高亮显示这一行
+    age: number // 高亮显示这一行
+    avatar?: string // 可选属性
+    role: 'admin' | 'user' | 'guest' // 高亮显示这一行
+}
+
+// 用户服务类
+class UserService {
+    private users: User[] = []
+
+    constructor() {
+        console.log('用户服务初始化')
+    }
+
+    addUser(user: User): void {
+        this.users.push(user)
+    }
+
+    getUserById(id: number): User | undefined {
+        return this.users.find((user) => user.id === id)
+    }
+}
+```
+
+## Python 示例
+
+```python title="data_processor.py"
+import pandas as pd
+import numpy as np
+from typing import List, Dict, Any
+
+class DataProcessor:
+    """数据处理类，用于清洗和转换数据"""
+
+    def __init__(self, data_path: str):
+        """初始化数据处理器
+
+        参数:
+            data_path: 数据文件路径
+        """
+        self.data = pd.read_csv(data_path)
+        self.processed = False
+
+    def clean_data(self) -> None:
+        """清洗数据，删除空值和异常值"""
+        # 删除空值
+        self.data.dropna(inplace=True)
+
+        # 删除异常值
+        q1 = self.data.quantile(0.25)
+        q3 = self.data.quantile(0.75)
+        iqr = q3 - q1
+        self.data = self.data[~((self.data < (q1 - 1.5 * iqr)) |
+                                (self.data > (q3 + 1.5 * iqr))).any(axis=1)]
+
+        self.processed = True
+        print(f"数据清洗完成，剩余 {len(self.data)} 条记录")
+
+    def get_statistics(self) -> Dict[str, Any]:
+        """获取数据统计信息
+
+        返回:
+            包含各种统计指标的字典
+        """
+        if not self.processed:
+            print("警告: 数据尚未清洗")
+
+        stats = {
+            "count": len(self.data),
+            "mean": self.data.mean().to_dict(),
+            "median": self.data.median().to_dict(),
+            "std": self.data.std().to_dict()
+        }
+
+        return stats
+```
+
+## HTML/CSS/JS 组合示例
+
+```html title="login-form.html"
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>登录表单</title>
+        <style>
+            .login-container {
+                max-width: 400px;
+                margin: 50px auto;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                background-color: #fff;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+
+            input[type='email'],
+            input[type='password'] {
+                width: 100%;
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+            }
+
+            .btn-primary {
+                background-color: #4caf50;
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            .btn-primary:hover {
+                background-color: #45a049;
+            }
+
+            .error {
+                color: red;
+                font-size: 14px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="login-container">
+            <h2>用户登录</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">邮箱</label>
+                    <input type="email" id="email" name="email" required />
+                    <div class="error" id="email-error"></div>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                    />
+                    <div class="error" id="password-error"></div>
+                </div>
+                <button type="submit" class="btn-primary">登录</button>
+            </form>
+        </div>
+
+        <script>
+            document
+                .getElementById('login-form')
+                .addEventListener('submit', function (e) {
+                    e.preventDefault()
+
+                    // 重置错误信息
+                    document.getElementById('email-error').textContent = ''
+                    document.getElementById('password-error').textContent = ''
+
+                    const email = document.getElementById('email').value
+                    const password = document.getElementById('password').value
+
+                    let isValid = true
+
+                    // 简单验证
+                    if (!email.includes('@')) {
+                        document.getElementById('email-error').textContent =
+                            '请输入有效的邮箱地址'
+                        isValid = false
+                    }
+
+                    if (password.length < 6) {
+                        document.getElementById('password-error').textContent =
+                            '密码长度不能少于6个字符'
+                        isValid = false
+                    }
+
+                    if (isValid) {
+                        // 在实际应用中，这里会发送登录请求到服务器
+                        console.log('表单验证通过，提交登录请求', {
+                            email,
+                            password,
+                        })
+                        alert('登录请求已发送！')
+                    }
+                })
+        </script>
+    </body>
+</html>
+```
+
+## JSON 示例
+
+```json title="config.json"
+{
+    "appName": "我的博客",
+    "version": "1.0.0",
+    "isDevelopment": true,
+    "api": {
+        "baseUrl": "https://api.example.com",
+        "timeout": 5000,
+        "endpoints": {
+            "posts": "/posts",
+            "comments": "/comments",
+            "users": "/users"
+        }
+    },
+    "features": {
+        "darkMode": true,
+        "comments": true,
+        "analytics": false
+    },
+    "authors": [
+        {
+            "id": 1,
+            "name": "张三",
+            "email": "zhang@example.com",
+            "role": "admin"
+        },
+        {
+            "id": 2,
+            "name": "李四",
+            "email": "li@example.com",
+            "role": "editor"
+        }
+    ],
+    "performance": {
+        "caching": {
+            "enabled": true,
+            "maxAge": 3600
+        },
+        "lazy": true
+    }
+}
+```
+
+## 终端命令示例
+
+```bash title="deploy.sh"
+#!/bin/bash
+
+# 部署脚本
+echo "开始部署流程..."
+
+# 检查必要的工具
+if ! [ -x "$(command -v git)" ]; then
+  echo '错误: git 未安装.' >&2
+  exit 1
+fi
+
+if ! [ -x "$(command -v npm)" ]; then
+  echo '错误: npm 未安装.' >&2
+  exit 1
+fi
+
+# 更新代码
+echo "正在拉取最新代码..."
+git pull origin main
+
+# 安装依赖
+echo "正在安装依赖..."
+npm install
+
+# 构建项目
+echo "正在构建项目..."
+npm run build
+
+# 检查构建结果
+if [ $? -ne 0 ]; then
+  echo "构建失败，取消部署"
+  exit 1
+fi
+
+# 部署到生产环境
+echo "正在部署到生产环境..."
+rsync -avz --delete dist/ user@example.com:/var/www/html/
+
+echo "部署完成!"
+```
+
+## SQL 示例
+
+```sql title="create_tables.sql"
+-- 创建用户表
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+-- 创建文章表
+CREATE TABLE posts (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    content TEXT NOT NULL,
+    author_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP,
+    published_at TIMESTAMP,
+    is_published BOOLEAN NOT NULL DEFAULT FALSE,
+    slug VARCHAR(200) UNIQUE NOT NULL,
+    views_count INTEGER NOT NULL DEFAULT 0
+);
+
+-- 创建评论表
+CREATE TABLE comments (
+    id SERIAL PRIMARY KEY,
+    post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    parent_comment_id INTEGER REFERENCES comments(id) ON DELETE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_approved BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+-- 创建标签表
+CREATE TABLE tags (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    slug VARCHAR(50) UNIQUE NOT NULL
+);
+
+-- 创建文章-标签关联表
+CREATE TABLE post_tags (
+    post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+    tag_id INTEGER REFERENCES tags(id) ON DELETE CASCADE,
+    PRIMARY KEY (post_id, tag_id)
+);
+
+-- 创建索引
+CREATE INDEX posts_author_id_idx ON posts(author_id);
+CREATE INDEX comments_post_id_idx ON comments(post_id);
+CREATE INDEX comments_user_id_idx ON comments(user_id);
+```
+
+## ANSI 终端输出示例
+
+```ansi
+[2;36m==> 正在运行测试...[0m
+[1;32m✓[0m 测试 1 通过！
+[1;32m✓[0m 测试 2 通过！
+[1;32m✓[0m 测试 3 通过！
+[1;32m✓[0m 测试 4 通过！
+[1;31m✗[0m 测试 5 失败!
+  [2;37m预期: [0m[1;32m'成功'[0m
+  [2;37m实际: [0m[1;31m'失败'[0m
+  [2;37m位置: [0m[1;34msrc/tests/file.test.js:85:4[0m
+[1;32m✓[0m 测试 6 通过！
+[1;32m✓[0m 测试 7 通过！
+
+[1;33m总计: [0m[1;32m6 通过[0m, [1;31m1 失败[0m, [1;30m0 跳过[0m (7 总计)
+[2;37m运行时间: 1.24s[0m
+```
+
+## 特性总结
+
+以上示例展示了我们代码高亮的主要特性：
+
+1. **语法高亮** - 支持多种编程语言
+2. **代码行号** - 自动添加行号便于参考
+3. **行高亮** - 可以通过 `{行号}` 语法高亮特定行
+4. **文件名显示** - 通过 `title="文件名"` 语法添加文件名
+5. **复制按钮** - 每个代码块右上角的复制按钮
+6. **暗色/明亮主题自适应** - 根据站点主题自动切换
+
+试着切换网站主题，看看代码块如何无缝适应新的颜色方案！
