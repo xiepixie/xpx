@@ -1,4 +1,6 @@
 ---
+import { getPath } from '../lib/path';
+
 export interface Props {
 	text?: string;
 }
@@ -8,9 +10,9 @@ const { text = "© 2024 BlogMaster. All rights reserved." } = Astro.props;
 
 <footer class="footer footer-center p-10 bg-base-200 text-base-content rounded-box">
   <div class="grid grid-flow-col gap-4">
-    <a class="link link-hover">关于我们</a>
-    <a class="link link-hover">联系方式</a>
-    <a class="link link-hover">隐私政策</a>
+    <a href={getPath('about')} class="link link-hover">关于我们</a>
+    <a href={getPath('contact')} class="link link-hover">联系方式</a>
+    <a href={getPath('privacy')} class="link link-hover">隐私政策</a>
   </div>
   <div>
     <p>{text}</p>

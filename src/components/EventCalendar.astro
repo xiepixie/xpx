@@ -47,10 +47,10 @@ const {
             summary: '与行业专家讨论最新技术趋势',
             url: '/blog/post-2'
         },
-        { 
-            id: 3, 
-            title: 'SEO Workshop', 
-            date: '2023-09-22', 
+        {
+            id: 3,
+            title: 'SEO Workshop',
+            date: '2023-09-22',
             time: '1:00 PM',
             summary: '学习最新的SEO优化技术和策略',
             url: '/blog/post-3'
@@ -116,7 +116,7 @@ const months = [
 ]
 
 function getFormattedDate(dateString: string) {
-    const date = new Date(dateString + 'T00:00:00')
+    const date = new Date(`${dateString}T00:00:00`)
     return {
         day: date.getDate().toString().padStart(2, '0'),
         month: months[date.getMonth()],
@@ -127,46 +127,46 @@ function getFormattedDate(dateString: string) {
 const allContentByDate = new Map<string, {events: Event[], blogs: BlogPost[]}>();
 
 // 添加事件数据
-eventData.forEach(event => {
+for (const event of eventData) {
     if (!allContentByDate.has(event.date)) {
         allContentByDate.set(event.date, {events: [], blogs: []});
     }
     allContentByDate.get(event.date)?.events.push(event);
-});
+}
 
 // 添加博客数据
-blogPosts.forEach(post => {
+for (const post of blogPosts) {
     if (!allContentByDate.has(post.date)) {
         allContentByDate.set(post.date, {events: [], blogs: []});
     }
     allContentByDate.get(post.date)?.blogs.push(post);
-});
+}
 
 // 按日期和时间排序事件
 const currentEvents: Event[] = [...eventData].sort((a, b) => {
-    const dateA = new Date(a.date + 'T' + convertTimeTo24Hour(a.time)).getTime();
-    const dateB = new Date(b.date + 'T' + convertTimeTo24Hour(b.time)).getTime();
+    const dateA = new Date(`${a.date}T${convertTimeTo24Hour(a.time)}`).getTime();
+    const dateB = new Date(`${b.date}T${convertTimeTo24Hour(b.time)}`).getTime();
     return dateA - dateB;
 });
 
 // 辅助函数：将12小时制时间转换为24小时制
 function convertTimeTo24Hour(timeStr: string): string {
     if (!timeStr) return '00:00:00';
-    
+
     // 匹配时间格式 "10:00 AM" 或 "2:30 PM"
     const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
     if (!match) return '00:00:00';
-    
-    let [_, hour, minute, period] = match;
-    let hourNum = parseInt(hour, 10);
-    
+
+    const [, hour, minute, period] = match;
+    let hourNum = Number.parseInt(hour, 10);
+
     // 转换为24小时制
     if (period.toUpperCase() === 'PM' && hourNum < 12) {
         hourNum += 12;
     } else if (period.toUpperCase() === 'AM' && hourNum === 12) {
         hourNum = 0;
     }
-    
+
     return `${hourNum.toString().padStart(2, '0')}:${minute}:00`;
 }
 ---
@@ -174,58 +174,69 @@ function convertTimeTo24Hour(timeStr: string): string {
 {/* Import Cally via CDN - Place this in <head> of your layout or here */}
 <script type="module" src="https://unpkg.com/cally" is:inline></script>
 
-<div id="event-calendar" class="mx-auto">
+<div id="event-calendar" class="mx-auto max-w-full">
     <div class="mb-8">
         <h2 class="text-2xl font-bold mb-2">{pageTitle}</h2>
         <p class="text-muted-foreground">{pageDescription}</p>
     </div>
-    
-    {/* Calendar Section */}
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
-        {/* Left Column: Calendar */}
-        <div class="lg:col-span-1 space-y-6 card bg-base-100 shadow-xl p-4 border border-base-300 rounded-box flex flex-col">
-            <h3 class="text-xl font-semibold mb-2">Select Date</h3>
-            <calendar-date
-                id="event-cally"
-                class="cally bg-base-100 border border-base-300 shadow-sm rounded-md w-full max-w-full"
-                first-day-of-week="1"
-                show-outside-days
-            >
-                <svg aria-label="Previous month" class="fill-current size-4 cursor-pointer hover:text-primary" slot="previous" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M15.75 19.5 8.25 12l7.5-7.5"></path></svg>
-                <calendar-month class="font-semibold text-center p-2"></calendar-month>
-                <svg aria-label="Next month" class="fill-current size-4 cursor-pointer hover:text-primary" slot="next" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path></svg>
-            </calendar-date>
 
-            {/* Selected date display */}
-            <div id="selected-date-display" class="text-center text-muted-foreground text-sm mt-2 py-2 px-4 bg-base-200 rounded-md">
-                Please select a date
+    {/* Calendar Section */}
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-12">
+        {/* Left Column: Calendar */}
+        <div class="lg:col-span-1 flex flex-col h-full">
+            <div class="flex-grow">
+                <calendar-date
+                    id="event-cally"
+                    class="cally bg-base-100 border border-base-300 shadow-sm rounded-md w-full max-w-full"
+                    first-day-of-week="1"
+                    show-outside-days
+                >
+                    <svg aria-label="Previous month" class="fill-current size-4 cursor-pointer hover:text-primary" slot="previous" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M15.75 19.5 8.25 12l7.5-7.5"></path></svg>
+                    <calendar-month class="font-semibold text-center p-2"></calendar-month>
+                    <svg aria-label="Next month" class="fill-current size-4 cursor-pointer hover:text-primary" slot="next" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path></svg>
+                </calendar-date>
+
+                {/* Selected date display - 增强视觉反馈 */}
+                <div id="selected-date-display" class="text-center text-muted-foreground text-sm mt-4 py-3 px-4 bg-base-200 rounded-md transition-all duration-300 hover:bg-base-300 cursor-pointer">
+                    请选择日期
+                </div>
+
+                {/* 快速日期选择按钮 */}
+                <div class="mt-4 grid grid-cols-3 gap-2">
+                    <button id="select-today" class="btn btn-sm btn-outline">今天</button>
+                    <button id="select-tomorrow" class="btn btn-sm btn-outline">明天</button>
+                    <button id="select-this-week" class="btn btn-sm btn-outline">本周</button>
+                </div>
             </div>
+
+            {/* 添加空白区域以确保与右侧内容区域底部对齐 */}
+            <div class="mt-auto"></div>
         </div>
 
         {/* Right Column: Content Preview */}
-        <div class="lg:col-span-3 relative">
-            <div id="content-preview" class="card bg-base-100 shadow-xl p-6 border border-base-300 rounded-box min-h-[400px]">
+        <div class="lg:col-span-3 relative flex flex-col h-full">
+            <div id="content-preview" class="card bg-base-100 shadow-xl p-4 sm:p-6 border border-base-300 rounded-box flex-grow overflow-hidden">
                 {/* Loading State (initially hidden) */}
-                <div id="preview-loading" class="hidden absolute inset-0 bg-base-100 bg-opacity-80 flex items-center justify-center z-10">
+                <div id="preview-loading" class="invisible opacity-0 absolute inset-0 bg-base-100 bg-opacity-80 flex items-center justify-center z-10">
                     <div class="flex flex-col items-center gap-4">
                         <span class="loading loading-spinner loading-lg text-primary"></span>
                         <p class="text-base-content/70">Loading content...</p>
                     </div>
                 </div>
-                
+
                 {/* No Content Selected State (initial view) */}
                 <div id="preview-empty" class="h-full flex flex-col items-center justify-center text-center p-8">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-base-content/20 mb-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                     </svg>
-                    <h3 class="text-xl font-semibold mb-2">Please select a date from the calendar</h3>
-                    <p class="text-base-content/70 max-w-md">Select a date to view related content, including scheduled events and blog posts</p>
+                    <h3 class="text-xl font-semibold mb-2">请从日历中选择日期</h3>
+                    <p class="text-base-content/70 max-w-md">选择日期以查看相关内容，包括计划的事件和博客文章</p>
                 </div>
 
                 {/* Blog Posts Preview (hidden until date selected) */}
                 <div id="preview-content" class="hidden">
                     <h3 class="text-xl font-semibold mb-6" id="preview-date-title">Selected Date Content</h3>
-                    
+
                     {/* Events Section */}
                     <div id="preview-events" class="mb-8">
                         <h4 class="font-medium text-lg mb-4">Events</h4>
@@ -233,7 +244,7 @@ function convertTimeTo24Hour(timeStr: string): string {
                             {/* Content will be populated by JavaScript */}
                         </div>
                     </div>
-                    
+
                     {/* Blog Posts Section */}
                     <div id="preview-blogs">
                         <h4 class="font-medium text-lg mb-4">Blog Posts</h4>
@@ -245,7 +256,7 @@ function convertTimeTo24Hour(timeStr: string): string {
             </div>
         </div>
     </div>
-    
+
 {/* 水平时间线组件 - 增加高度并优化布局 */}
 <div class="card bg-base-100 shadow-xl p-6 border border-base-300 rounded-box mb-8">
     <div class="flex justify-between items-center mb-6">
@@ -261,13 +272,12 @@ function convertTimeTo24Hour(timeStr: string): string {
     </div>
 
     <div class="overflow-x-auto pb-4">
-        <ul id="vertical-timeline" class="timeline timeline-snap-icon timeline-horizontal max-w-full min-h-[320px]">
+        <ul id="vertical-timeline" class="timeline timeline-snap-icon timeline-horizontal w-full">
             {currentEvents.length > 0 ? currentEvents.map((event, index) => {
-                const { day, month } = getFormattedDate(event.date);
                 // 通过索引控制左右位置交替
                 const isLeft = index % 2 === 0;
                 return (
-                    <li data-event-date={event.date} class="timeline-item">
+                    <li data-event-date={event.date} class="timeline-item w-[250px]">
                         {/* 时间线分割线 */}
                         <hr aria-hidden="true" />
 
@@ -307,9 +317,10 @@ function convertTimeTo24Hour(timeStr: string): string {
 {/* Client-side script for Cally interaction and content preview */}
 <script define:vars={{ allContentData: Object.fromEntries(allContentByDate), blogPosts, eventData }}>
     document.addEventListener('astro:page-load', () => {
+        // 核心元素
         const calendar = document.getElementById('event-cally');
         const selectedDateDisplay = document.getElementById('selected-date-display');
-        
+
         // 内容预览相关元素
         const contentPreview = document.getElementById('content-preview');
         const previewLoading = document.getElementById('preview-loading');
@@ -318,58 +329,152 @@ function convertTimeTo24Hour(timeStr: string): string {
         const previewDateTitle = document.getElementById('preview-date-title');
         const eventsContainer = document.getElementById('events-container');
         const blogsContainer = document.getElementById('blogs-container');
-        
+
         // 水平时间线相关元素
         const verticalTimeline = document.getElementById('vertical-timeline');
         const timelinePrev = document.getElementById('timeline-prev');
         const timelineNext = document.getElementById('timeline-next');
-        
+
         // 显示加载状态
         const showLoading = () => {
-            if (previewLoading) previewLoading.classList.remove('hidden');
-            if (previewEmpty) previewEmpty.classList.add('hidden');
-            if (previewContent) previewContent.classList.add('hidden');
+            previewLoading?.classList.remove('invisible', 'opacity-0');
+            previewEmpty?.classList.add('hidden');
+            previewContent?.classList.add('hidden');
         };
-        
+
         // 显示空状态
         const showEmpty = () => {
-            if (previewLoading) previewLoading.classList.add('hidden');
-            if (previewEmpty) previewEmpty.classList.remove('hidden');
-            if (previewContent) previewContent.classList.add('hidden');
+            previewLoading?.classList.add('invisible', 'opacity-0');
+            previewEmpty?.classList.remove('hidden');
+            previewContent?.classList.add('hidden');
         };
-        
+
         // 显示内容
         const showContent = () => {
-            if (previewLoading) previewLoading.classList.add('hidden');
-            if (previewEmpty) previewEmpty.classList.add('hidden');
-            if (previewContent) previewContent.classList.remove('hidden');
+            previewLoading?.classList.add('invisible', 'opacity-0');
+            previewEmpty?.classList.add('hidden');
+            previewContent?.classList.remove('hidden');
         };
-        
-        // 加载日期内容
+
+        // 加载日期内容 - 增强UX设计，确保始终有响应提示
         const loadDateContent = (selectedDate) => {
-            // 显示加载状态
+            console.log('加载日期内容:', selectedDate);
+
+            // 先显示加载状态
             showLoading();
-            
-            // 模拟加载延迟，实际应用中可能是API调用
+
+            // 短暂延迟以显示加载状态
             setTimeout(() => {
-                if (!selectedDate || !allContentData[selectedDate]) {
+                // 检查是否有该日期的内容
+                if (!selectedDate) {
+                    console.log('未提供日期');
+                    // 显示友好提示而不是空状态
+                    if (previewEmpty) {
+                        previewEmpty.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-base-content/20 mb-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                            </svg>
+                            <h3 class="text-xl font-semibold mb-2">请从日历中选择日期</h3>
+                            <p class="text-base-content/70 max-w-md">选择日期以查看相关内容，包括计划的事件和博客文章</p>
+                        `;
+                    }
                     showEmpty();
                     return;
                 }
-                
-                const dateContent = allContentData[selectedDate];
-                
-                // 更新日期标题
-                if (previewDateTitle) {
-                    try {
-                        const dateObj = new Date(selectedDate + 'T00:00:00');
-                        const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-                        previewDateTitle.textContent = `Content for ${dateObj.toLocaleDateString('en-US', options)}`;
-                    } catch (err) {
-                        previewDateTitle.textContent = `Content for ${selectedDate}`;
+
+                // 格式化日期显示
+                let formattedDate = '';
+                try {
+                    const dateObj = new Date(selectedDate + 'T00:00:00');
+                    const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+                    formattedDate = dateObj.toLocaleDateString('zh-CN', options);
+                } catch (err) {
+                    formattedDate = selectedDate;
+                }
+
+                // 检查是否有该日期的内容
+                if (!allContentData[selectedDate]) {
+                    console.log('未找到该日期的内容:', selectedDate);
+
+                    // 显示友好的"无内容"提示，而不是空状态
+                    if (previewContent) {
+                        // 更新日期标题
+                        if (previewDateTitle) {
+                            previewDateTitle.textContent = `${formattedDate}`;
+                        }
+
+                        // 更新事件列表 - 显示友好提示
+                        if (eventsContainer) {
+                            eventsContainer.innerHTML = `
+                                <div class="p-4 border border-base-300 rounded-lg bg-base-200/50">
+                                    <div class="flex flex-col items-center text-center p-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-base-content/30 mb-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
+                                        </svg>
+                                        <h5 class="font-medium text-lg">该日期暂无计划事件</h5>
+                                        <p class="mt-2 text-sm text-base-content/70">您可以选择其他日期查看，或使用快速选择按钮</p>
+                                        <div class="mt-4 flex gap-2">
+                                            <button id="empty-select-today" class="btn btn-sm btn-outline btn-primary">今天</button>
+                                            <button id="empty-select-tomorrow" class="btn btn-sm btn-outline">明天</button>
+                                            <button id="empty-select-this-week" class="btn btn-sm btn-outline">本周</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+
+                            // 添加内联按钮事件
+                            setTimeout(() => {
+                                const emptyTodayBtn = document.getElementById('empty-select-today');
+                                const emptyTomorrowBtn = document.getElementById('empty-select-tomorrow');
+                                const emptyThisWeekBtn = document.getElementById('empty-select-this-week');
+
+                                // 复用主按钮的点击事件
+                                emptyTodayBtn?.addEventListener('click', () => {
+                                    document.getElementById('select-today')?.click();
+                                });
+
+                                emptyTomorrowBtn?.addEventListener('click', () => {
+                                    document.getElementById('select-tomorrow')?.click();
+                                });
+
+                                emptyThisWeekBtn?.addEventListener('click', () => {
+                                    document.getElementById('select-this-week')?.click();
+                                });
+                            }, 0);
+                        }
+
+                        // 更新博客列表 - 显示友好提示
+                        if (blogsContainer) {
+                            blogsContainer.innerHTML = `
+                                <div class="p-4 border border-base-300 rounded-lg bg-base-200/50">
+                                    <div class="flex flex-col items-center text-center p-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-base-content/30 mb-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                                        </svg>
+                                        <h5 class="font-medium text-lg">该日期暂无博客文章</h5>
+                                        <p class="mt-2 text-sm text-base-content/70">您可以浏览其他日期的内容</p>
+                                    </div>
+                                </div>
+                            `;
+                        }
+
+                        // 显示内容而不是空状态
+                        showContent();
+                        return;
+                    } else {
+                        showEmpty();
+                        return;
                     }
                 }
-                
+
+                console.log('找到内容:', JSON.stringify(allContentData[selectedDate]));
+                const dateContent = allContentData[selectedDate];
+
+                // 更新日期标题
+                if (previewDateTitle) {
+                    previewDateTitle.textContent = `${formattedDate}的内容`;
+                }
+
                 // 更新事件列表
                 if (eventsContainer) {
                     if (dateContent.events && dateContent.events.length > 0) {
@@ -384,17 +489,27 @@ function convertTimeTo24Hour(timeStr: string): string {
                                             </span>
                                             <span>${event.time}</span>
                                         </div>
-                                        <p class="mt-2 text-sm">${event.summary || "No description available"}</p>
+                                        <p class="mt-2 text-sm">${event.summary || "暂无描述"}</p>
                                     </div>
-                                    <a href="${event.url || "#"}" class="btn btn-sm btn-primary">Details</a>
+                                    <a href="${event.url || "#"}" class="btn btn-sm btn-primary">详情</a>
                                 </div>
                             </div>
                         `).join('');
                     } else {
-                        eventsContainer.innerHTML = '<p class="text-base-content/50 py-2">No events scheduled for this date</p>';
+                        eventsContainer.innerHTML = `
+                            <div class="p-4 border border-base-300 rounded-lg bg-base-200/50">
+                                <div class="flex flex-col items-center text-center p-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-base-content/30 mb-3">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
+                                    </svg>
+                                    <h5 class="font-medium text-lg">该日期暂无计划事件</h5>
+                                    <p class="mt-2 text-sm text-base-content/70">您可以选择其他日期查看</p>
+                                </div>
+                            </div>
+                        `;
                     }
                 }
-                
+
                 // 更新博客列表
                 if (blogsContainer) {
                     if (dateContent.blogs && dateContent.blogs.length > 0) {
@@ -408,78 +523,79 @@ function convertTimeTo24Hour(timeStr: string): string {
                                 <div class="flex-1">
                                     <h5 class="font-medium">${blog.title}</h5>
                                     <p class="mt-1 text-sm line-clamp-2">${blog.summary}</p>
-                                    <a href="${blog.url}" class="btn btn-sm btn-outline btn-primary mt-2">Read Article</a>
+                                    <a href="${blog.url}" class="btn btn-sm btn-outline btn-primary mt-2">阅读文章</a>
                                 </div>
                             </div>
                         `).join('');
                     } else {
-                        blogsContainer.innerHTML = '<p class="text-base-content/50 py-2">No blog posts for this date</p>';
+                        blogsContainer.innerHTML = `
+                            <div class="p-4 border border-base-300 rounded-lg bg-base-200/50">
+                                <div class="flex flex-col items-center text-center p-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-base-content/30 mb-3">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                                    </svg>
+                                    <h5 class="font-medium text-lg">该日期暂无博客文章</h5>
+                                    <p class="mt-2 text-sm text-base-content/70">您可以浏览其他日期的内容</p>
+                                </div>
+                            </div>
+                        `;
                     }
                 }
-                
+
                 // 显示内容
                 showContent();
-                
-            }, 300); // 缩短加载延迟，提升用户体验
+
+            }, 300);
         };
-        
-        // 水平时间线滚动功能优化
+
+        // 水平时间线滚动功能
         if (timelinePrev && timelineNext && verticalTimeline) {
-            // 定义滚动距离和动画持续时间
             const scrollDistance = 300;
-            
-            // 修复滚动按钮功能
+
             timelinePrev.addEventListener('click', () => {
-                verticalTimeline.scrollBy({ 
-                    left: -scrollDistance, 
-                    behavior: 'smooth' 
+                verticalTimeline.scrollBy({
+                    left: -scrollDistance,
+                    behavior: 'smooth'
                 });
             });
-            
+
             timelineNext.addEventListener('click', () => {
-                verticalTimeline.scrollBy({ 
-                    left: scrollDistance, 
-                    behavior: 'smooth' 
+                verticalTimeline.scrollBy({
+                    left: scrollDistance,
+                    behavior: 'smooth'
                 });
             });
-            
-            // 显示/隐藏滚动按钮
+
             const updateScrollButtons = () => {
                 if (!verticalTimeline || !timelinePrev || !timelineNext) return;
-                
+
                 const isAtStart = verticalTimeline.scrollLeft <= 10;
                 const isAtEnd = verticalTimeline.scrollLeft + verticalTimeline.clientWidth >= verticalTimeline.scrollWidth - 10;
-                
+
                 timelinePrev.disabled = isAtStart;
                 timelinePrev.classList.toggle('btn-disabled', isAtStart);
-                
+
                 timelineNext.disabled = isAtEnd;
                 timelineNext.classList.toggle('btn-disabled', isAtEnd);
             };
-            
-            // 初始化按钮状态
+
             setTimeout(updateScrollButtons, 100);
-            
-            // 监听滚动事件更新按钮状态
-            verticalTimeline.addEventListener('scroll', updateScrollButtons);
-            
-            // 窗口调整大小时更新按钮状态
+            verticalTimeline?.addEventListener('scroll', updateScrollButtons);
             window.addEventListener('resize', updateScrollButtons);
         }
-        
+
         // 高亮选中日期事件
         const highlightTimelineEvents = (selectedDate) => {
             if (!verticalTimeline) return;
-            
+
             const allTimelineItems = verticalTimeline.querySelectorAll('li[data-event-date]');
             let foundMatch = false;
-            
+
             allTimelineItems.forEach(item => {
                 const eventDate = item.getAttribute('data-event-date');
                 if (eventDate === selectedDate) {
                     item.classList.add('timeline-item-active');
                     foundMatch = true;
-                    // 滚动到该元素
                     setTimeout(() => {
                         item.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                     }, 100);
@@ -487,81 +603,195 @@ function convertTimeTo24Hour(timeStr: string): string {
                     item.classList.remove('timeline-item-active');
                 }
             });
-            
+
             return foundMatch;
         };
-        
-        // 日历变化事件
+
+        // 初始化日历及其事件处理
         if (calendar) {
-            // 初始状态
+            // 初始化日历的基础设置
+            console.log('初始化日历组件');
+            calendar.addEventListener('load', () => console.log('日历加载完成'));
+
+            // 设置初始状态和显示
             showEmpty();
-            
-            // 设置初始日期显示
+
             if (selectedDateDisplay) {
-                selectedDateDisplay.textContent = 'Please select a date';
-                selectedDateDisplay.classList.add('bg-base-200');
+                selectedDateDisplay.textContent = '请选择日期';
             }
-            
-            // 监听日期变化
-            calendar.addEventListener('change', (e) => {
-                const selectedDate = e.target.value; // Format: YYYY-MM-DD
-                
-                // 更新日期显示
-                if (selectedDateDisplay) {
+
+            // 直接监听日历的点击事件
+            calendar.addEventListener('click', (e) => {
+                // 检查点击的是否是日期元素
+                if (e.target && e.target.tagName && e.target.tagName.toLowerCase() === 'calendar-day') {
+                    console.log('日历日期点击事件触发');
+
+                    // 获取选中的日期
+                    const selectedDate = e.target.getAttribute('date');
+                    console.log('点击选中日期:', selectedDate);
+
                     if (selectedDate) {
+                        // 手动设置日历值
+                        calendar.value = selectedDate;
+
+                        // 更新日期显示
+                        if (selectedDateDisplay) {
+                            try {
+                                const dateObj = new Date(selectedDate + 'T00:00:00');
+                                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                                selectedDateDisplay.textContent = `已选择: ${dateObj.toLocaleDateString('zh-CN', options)}`;
+                                selectedDateDisplay.classList.remove('bg-base-200', 'text-muted-foreground');
+                                selectedDateDisplay.classList.add('bg-primary', 'text-primary-content');
+                            } catch (err) {
+                                selectedDateDisplay.textContent = `已选择: ${selectedDate}`;
+                            }
+                        }
+
+                        // 加载选中日期的内容
+                        loadDateContent(selectedDate);
+
+                        // 高亮时间线上的相应事件
+                        highlightTimelineEvents(selectedDate);
+                    }
+                }
+            });
+
+            // 同时保留change事件监听，以防组件本身的事件机制
+            calendar.addEventListener('change', (e) => {
+                console.log('日历change事件触发');
+                const selectedDate = e?.target?.value; // 获取选中的日期
+
+                if (selectedDate) {
+                    console.log('change事件选中日期:', selectedDate);
+
+                    // 更新日期显示
+                    if (selectedDateDisplay) {
                         try {
                             const dateObj = new Date(selectedDate + 'T00:00:00');
                             const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                            selectedDateDisplay.textContent = `Selected: ${dateObj.toLocaleDateString('en-US', options)}`;
+                            selectedDateDisplay.textContent = `已选择: ${dateObj.toLocaleDateString('zh-CN', options)}`;
                             selectedDateDisplay.classList.remove('bg-base-200', 'text-muted-foreground');
                             selectedDateDisplay.classList.add('bg-primary', 'text-primary-content');
                         } catch (err) {
-                            selectedDateDisplay.textContent = `Invalid date: ${selectedDate}`;
+                            selectedDateDisplay.textContent = `已选择: ${selectedDate}`;
                         }
-                    } else {
-                        selectedDateDisplay.textContent = 'Please select a date';
-                        selectedDateDisplay.classList.remove('bg-primary', 'text-primary-content');
-                        selectedDateDisplay.classList.add('bg-base-200', 'text-muted-foreground');
+                    }
+
+                    // 加载选中日期的内容
+                    loadDateContent(selectedDate);
+
+                    // 高亮时间线上的相应事件
+                    highlightTimelineEvents(selectedDate);
+                }
+            });
+
+            // 备用方法：尝试使用MutationObserver监听日历值的变化
+            const calendarObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                        const selectedDate = calendar.value;
+                        console.log('日历值变化(Observer):', selectedDate);
+
+                        // 重复上面的处理逻辑
+                        if (selectedDateDisplay) {
+                            if (selectedDate) {
+                                try {
+                                    const dateObj = new Date(selectedDate + 'T00:00:00');
+                                    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                                    selectedDateDisplay.textContent = `已选择: ${dateObj.toLocaleDateString('zh-CN', options)}`;
+                                    selectedDateDisplay.classList.remove('bg-base-200', 'text-muted-foreground');
+                                    selectedDateDisplay.classList.add('bg-primary', 'text-primary-content');
+                                } catch (err) {
+                                    selectedDateDisplay.textContent = `已选择: ${selectedDate}`;
+                                }
+                            } else {
+                                selectedDateDisplay.textContent = '请选择日期';
+                                selectedDateDisplay.classList.remove('bg-primary', 'text-primary-content');
+                                selectedDateDisplay.classList.add('bg-base-200', 'text-muted-foreground');
+                            }
+                        }
+
+                        loadDateContent(selectedDate);
+                        highlightTimelineEvents(selectedDate);
+                    }
+                });
+            });
+
+            calendarObserver.observe(calendar, { attributes: true });
+
+            // 设置默认选中日期（今天或最近的有内容的日期）
+            const today = new Date();
+            const todayFormatted = today.toISOString().split('T')[0];
+
+            // 延迟一点执行以确保日历已完全初始化
+            setTimeout(() => {
+                // 先检查当前日期是否有内容
+                if (allContentData[todayFormatted]) {
+                    console.log('默认选择今天:', todayFormatted);
+                    calendar.value = todayFormatted;
+
+                    // 手动触发事件
+                    const event = new Event('change', { bubbles: true });
+                    calendar.dispatchEvent(event);
+                } else {
+                    // 查找最近的有内容的日期
+                    const allDates = Object.keys(allContentData).sort();
+                    if (allDates.length > 0) {
+                        // 找到大于等于今天的最早日期，如果没有则取第一个日期
+                        const closestDate = allDates.find(date => date >= todayFormatted) || allDates[0];
+                        console.log('默认选择最近日期:', closestDate);
+
+                        calendar.value = closestDate;
+
+                        // 手动触发事件
+                        const event = new Event('change', { bubbles: true });
+                        calendar.dispatchEvent(event);
                     }
                 }
-                
-                // 加载选中日期的内容
-                loadDateContent(selectedDate);
-                
-                // 高亮时间线上的相应事件
-                highlightTimelineEvents(selectedDate);
-            });
-            
-            // 初始化时间线项点击事件 - 改进为更明显的可点击效果
+            }, 500);
+
+            // 增加点击方式：如果选择日期后没有反应，可以点击显示日期的区域重新触发
+            if (selectedDateDisplay) {
+                selectedDateDisplay.addEventListener('click', () => {
+                    if (calendar && calendar.value) {
+                        console.log('点击显示区域重新触发内容加载:', calendar.value);
+                        loadDateContent(calendar.value);
+                        highlightTimelineEvents(calendar.value);
+                    }
+                });
+            }
+
+            // 初始化时间线项点击事件
             document.querySelectorAll('.timeline-item').forEach(item => {
-                // 添加鼠标悬停效果
                 item.classList.add('hover:bg-base-200', 'cursor-pointer', 'transition-all', 'duration-300');
-                
+
                 item.addEventListener('click', () => {
                     const eventDate = item.getAttribute('data-event-date');
+                    console.log('点击时间线项:', eventDate);
+
                     if (eventDate && calendar) {
                         // 设置日历值
                         calendar.value = eventDate;
-                        
+
                         // 确保选中状态可见
                         if (selectedDateDisplay) {
                             try {
                                 const dateObj = new Date(eventDate + 'T00:00:00');
                                 const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                                selectedDateDisplay.textContent = `Selected: ${dateObj.toLocaleDateString('en-US', options)}`;
+                                selectedDateDisplay.textContent = `已选择: ${dateObj.toLocaleDateString('zh-CN', options)}`;
                                 selectedDateDisplay.classList.remove('bg-base-200', 'text-muted-foreground');
                                 selectedDateDisplay.classList.add('bg-primary', 'text-primary-content');
                             } catch (err) {
-                                selectedDateDisplay.textContent = `Invalid date: ${eventDate}`;
+                                selectedDateDisplay.textContent = `已选择: ${eventDate}`;
                             }
                         }
-                        
+
                         // 手动加载内容
                         loadDateContent(eventDate);
-                        
+
                         // 高亮时间线项
                         highlightTimelineEvents(eventDate);
-                        
+
                         // 滚动到日历部分
                         const calendarSection = document.getElementById('event-calendar');
                         if (calendarSection) {
@@ -570,19 +800,129 @@ function convertTimeTo24Hour(timeStr: string): string {
                     }
                 });
             });
-            
+
+            // 快速日期选择按钮功能
+            const selectTodayBtn = document.getElementById('select-today');
+            const selectTomorrowBtn = document.getElementById('select-tomorrow');
+            const selectThisWeekBtn = document.getElementById('select-this-week');
+
+            // 今天按钮
+            if (selectTodayBtn && calendar) {
+                selectTodayBtn.addEventListener('click', () => {
+                    const today = new Date();
+                    const todayFormatted = today.toISOString().split('T')[0];
+
+                    // 设置日历值
+                    calendar.value = todayFormatted;
+
+                    // 更新显示
+                    if (selectedDateDisplay) {
+                        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                        selectedDateDisplay.textContent = `已选择: ${today.toLocaleDateString('zh-CN', options)}`;
+                        selectedDateDisplay.classList.remove('bg-base-200', 'text-muted-foreground');
+                        selectedDateDisplay.classList.add('bg-primary', 'text-primary-content');
+                    }
+
+                    // 加载内容
+                    loadDateContent(todayFormatted);
+                    highlightTimelineEvents(todayFormatted);
+
+                    // 高亮当前按钮
+                    selectTodayBtn.classList.remove('btn-outline');
+                    selectTodayBtn.classList.add('btn-primary');
+                    selectTomorrowBtn?.classList.add('btn-outline');
+                    selectTomorrowBtn?.classList.remove('btn-primary');
+                    selectThisWeekBtn?.classList.add('btn-outline');
+                    selectThisWeekBtn?.classList.remove('btn-primary');
+                });
+            }
+
+            // 明天按钮
+            if (selectTomorrowBtn && calendar) {
+                selectTomorrowBtn.addEventListener('click', () => {
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    const tomorrowFormatted = tomorrow.toISOString().split('T')[0];
+
+                    // 设置日历值
+                    calendar.value = tomorrowFormatted;
+
+                    // 更新显示
+                    if (selectedDateDisplay) {
+                        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                        selectedDateDisplay.textContent = `已选择: ${tomorrow.toLocaleDateString('zh-CN', options)}`;
+                        selectedDateDisplay.classList.remove('bg-base-200', 'text-muted-foreground');
+                        selectedDateDisplay.classList.add('bg-primary', 'text-primary-content');
+                    }
+
+                    // 加载内容
+                    loadDateContent(tomorrowFormatted);
+                    highlightTimelineEvents(tomorrowFormatted);
+
+                    // 高亮当前按钮
+                    selectTomorrowBtn.classList.remove('btn-outline');
+                    selectTomorrowBtn.classList.add('btn-primary');
+                    selectTodayBtn?.classList.add('btn-outline');
+                    selectTodayBtn?.classList.remove('btn-primary');
+                    selectThisWeekBtn?.classList.add('btn-outline');
+                    selectThisWeekBtn?.classList.remove('btn-primary');
+                });
+            }
+
+            // 本周按钮
+            if (selectThisWeekBtn && calendar) {
+                selectThisWeekBtn.addEventListener('click', () => {
+                    const today = new Date();
+                    const dayOfWeek = today.getDay(); // 0 是周日，1-6 是周一到周六
+
+                    // 计算本周一的日期
+                    const monday = new Date(today);
+                    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                    monday.setDate(today.getDate() - daysToMonday);
+
+                    const mondayFormatted = monday.toISOString().split('T')[0];
+
+                    // 设置日历值
+                    calendar.value = mondayFormatted;
+
+                    // 更新显示
+                    if (selectedDateDisplay) {
+                        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                        selectedDateDisplay.textContent = `本周: ${monday.toLocaleDateString('zh-CN', options)} 开始`;
+                        selectedDateDisplay.classList.remove('bg-base-200', 'text-muted-foreground');
+                        selectedDateDisplay.classList.add('bg-primary', 'text-primary-content');
+                    }
+
+                    // 加载内容
+                    loadDateContent(mondayFormatted);
+                    highlightTimelineEvents(mondayFormatted);
+
+                    // 高亮当前按钮
+                    selectThisWeekBtn.classList.remove('btn-outline');
+                    selectThisWeekBtn.classList.add('btn-primary');
+                    selectTodayBtn?.classList.add('btn-outline');
+                    selectTodayBtn?.classList.remove('btn-primary');
+                    selectTomorrowBtn?.classList.add('btn-outline');
+                    selectTomorrowBtn?.classList.remove('btn-primary');
+                });
+            }
+
             // 检查URL参数是否有日期，如果有则自动选中
             const urlParams = new URLSearchParams(window.location.search);
             const dateParam = urlParams.get('date');
-            
+
             if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
-                // 设置日历值
-                calendar.value = dateParam;
-                
-                // 触发日期选择
-                const event = new Event('change', { bubbles: true });
-                calendar.dispatchEvent(event);
+                setTimeout(() => {
+                    console.log('从URL选择日期:', dateParam);
+                    calendar.value = dateParam;
+
+                    // 手动触发事件
+                    const event = new Event('change', { bubbles: true });
+                    calendar.dispatchEvent(event);
+                }, 700);
             }
+        } else {
+            console.error('找不到日历元素!');
         }
     });
 </script>
@@ -595,54 +935,65 @@ function convertTimeTo24Hour(timeStr: string): string {
         padding: 1rem 0;
         scroll-snap-type: x mandatory;
         position: relative;
-        min-height: 320px; /* 增加高度确保足够的内容空间 */
+        min-height: 280px; /* 减小高度使组件更紧凑 */
+        width: 100%; /* 确保宽度不超出父容器 */
     }
-    
+
     .timeline-horizontal > li {
         flex: 0 0 auto;
         scroll-snap-align: start;
-        width: 300px;
-        padding: 0 1rem;
+        width: 240px; /* 减少宽度使更多项目可见 */
+        padding: 0 0.75rem;
         position: relative;
     }
-    
+
     .timeline-horizontal .timeline-start,
     .timeline-horizontal .timeline-end {
         position: relative;
-        padding: 1rem;
-        margin: 1rem 0;
-        width: 250px; /* 固定宽度确保对齐 */
+        padding: 0.75rem;
+        margin: 0.75rem 0;
+        width: 200px; /* 减少宽度使内容更紧凑 */
         border: 1px solid transparent;
         border-radius: 0.5rem;
     }
-    
+
     /* 修复垂直对齐问题 */
     .timeline-horizontal .timeline-start {
-        top: -40px; /* 减小偏移量 */
+        top: -10px; /* 减小偏移量，使布局更紧凑 */
     }
-    
+
     .timeline-horizontal .timeline-end {
-        top: 40px; /* 减小偏移量 */
+        top: 10px; /* 减小偏移量，使布局更紧凑 */
     }
-    
+
+    /* 时间线中间图标位置修复 - 确保完全居中在线上 */
     .timeline-horizontal .timeline-middle {
         position: absolute;
-        top: 50%;
-        left: 50%;
+        top: 0;
+        left: 100%;
         transform: translate(-50%, -50%);
         z-index: 10;
         background-color: hsl(var(--b1));
         border: 2px solid hsl(var(--p));
         border-radius: 50%;
         padding: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    
+
+    /* 选中项时同样调整位置 */
+    .timeline-item-active .timeline-middle {
+        transform: translate(-50%, -50%) scale(1.2);
+        background-color: hsl(var(--p) / 0.2);
+    }
+
     .timeline-item {
         position: relative;
         transition: all 0.3s ease;
         cursor: pointer;
     }
-    
+
     /* 选中项的高亮样式 */
     .timeline-item-active .content-container {
         border-color: hsl(var(--p));
@@ -650,16 +1001,11 @@ function convertTimeTo24Hour(timeStr: string): string {
         box-shadow: 0 0 0 2px hsl(var(--p) / 0.2);
         transform: scale(1.05);
     }
-    
-    .timeline-item-active .timeline-middle {
-        transform: translate(-50%, -50%) scale(1.2);
-        background-color: hsl(var(--p) / 0.2);
-    }
 
     /* 日历样式优化 */
     .cally {
         width: 100%;
-        max-width: 100%; 
+        max-width: 100%;
         font-size: 0.9rem;
         --cally-color-brand: hsl(var(--p));
         --cally-color-brand-emphasis: hsl(var(--pf));
@@ -695,7 +1041,7 @@ function convertTimeTo24Hour(timeStr: string): string {
         padding: 0.75rem;
         transition: all 0.3s ease;
     }
-    
+
     /* 空状态图标居中样式 */
     #preview-empty {
         display: flex;
@@ -706,33 +1052,33 @@ function convertTimeTo24Hour(timeStr: string): string {
         height: 100%;
         min-height: 300px;
     }
-    
+
     #preview-empty svg {
         margin: 0 auto 1.5rem;
     }
-    
+
     /* 滚动控制按钮样式 */
     #timeline-prev:disabled,
     #timeline-next:disabled {
         opacity: 0.5;
         cursor: not-allowed;
     }
-    
+
     /* 自定义滚动条 */
     .overflow-x-auto::-webkit-scrollbar {
         height: 6px;
     }
-    
+
     .overflow-x-auto::-webkit-scrollbar-track {
         background: hsl(var(--b3));
         border-radius: 3px;
     }
-    
+
     .overflow-x-auto::-webkit-scrollbar-thumb {
         background: hsl(var(--p) / 0.5);
         border-radius: 3px;
     }
-    
+
     .overflow-x-auto::-webkit-scrollbar-thumb:hover {
         background: hsl(var(--p));
     }

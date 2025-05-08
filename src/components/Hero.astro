@@ -3,6 +3,7 @@ import { Badge } from './react/Badge'
 import { Separator } from './react/Separator'
 import { BookOpen, Calendar, User, BarChart3 } from './react/Icons'
 import type { ComponentType } from 'react'
+import { getPath } from '../lib/path'
 
 interface Feature {
     icon: ComponentType<{ className?: string }>
@@ -36,7 +37,7 @@ const featureIcons = { BookOpen, Calendar, User, BarChart3 }
             <h1 class="text-5xl font-bold">{title}</h1>
             <p class="py-6 text-lg text-base-content/80">{subtitle}</p>
             <div class="flex flex-wrap gap-4 justify-center">
-                <a href="/blog" class="btn btn-primary">
+                <a href={getPath("blog")} class="btn btn-primary">
                     {primaryButtonText}
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -51,7 +52,7 @@ const featureIcons = { BookOpen, Calendar, User, BarChart3 }
                         ></path>
                     </svg>
                 </a>
-                <a href="/about" class="btn btn-outline">
+                <a href={getPath("about")} class="btn btn-outline">
                     {secondaryButtonText}
                 </a>
             </div>

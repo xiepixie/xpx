@@ -6,106 +6,129 @@ import NotebookKanban from '../components/NotebookKanban.astro';
 import KeywordCloud from '../components/KeywordCloud.astro';
 import EventCalendar from '../components/EventCalendar.astro';
 import FloatingMenu from '../components/FloatingMenu.astro';
+import Search from '../components/Search.astro';
+import { getPath } from '../lib/path';
 import "../styles/global.css"
+
 const pageTitle = "Blog Homepage";
 ---
 <BaseLayout title={pageTitle}>
-	<main class="container mx-auto px-4 py-8">
-		<div class="flex flex-col gap-12">
-			<Hero id="hero" aria-label="Hero section" />
-			
-			<NotebookKanban id="notebook-kanban" aria-label="Notebook kanban board" />
-			<KeywordCloud id="keyword-cloud" aria-label="Keyword cloud visualization" />
-			
-			<EventCalendar 
-				aria-label="Event calendar" 
-				title="Upcoming Events"
-				description="Stay updated with our content calendar"
-				events={[
-					{
-						id: 1,
-						title: 'Content Planning Meeting',
-						date: '2025-04-24',
-						time: '10:00 AM',
-						summary: 'Discussion of next quarter content strategy and planning',
-						url: '/blog/post-1'
-					},
-					{
-						id: 2,
-						title: 'Guest Writer Interview',
-						date: '2023-09-18',
-						time: '2:30 PM',
-						summary: 'Interview with industry expert on latest tech trends',
-						url: '/blog/post-2'
-					},
-					{ 
-						id: 3, 
-						title: 'SEO Workshop', 
-						date: '2023-09-22', 
-						time: '1:00 PM',
-						summary: 'Learn the latest SEO optimization techniques and strategies',
-						url: '/blog/post-3'
-					},
-					{
-						id: 4,
-						title: 'Content Review Session',
-						date: '2023-09-25',
-						time: '11:00 AM',
-						summary: 'Review and optimize the performance of published content',
-						url: '/blog/post-4'
-					},
-					{
-						id: 5,
-						title: 'Editorial Calendar Planning',
-						date: '2023-09-30',
-						time: '3:00 PM',
-						summary: 'Plan content publishing schedule for the next three months',
-						url: '/blog/post-5'
-					},
-				]}
-				blogPosts={[
-					{
-						id: 101,
-						title: "Modern JavaScript Development Practices",
-						date: "2023-09-15",
-						summary: "Explore the latest JavaScript features and best practices to improve development efficiency",
-						url: "/blog/javascript-modern-dev",
-						image: "/images/placeholder-1.jpg"
-					},
-					{
-						id: 102,
-						title: "Website Performance Optimization Guide",
-						date: "2023-09-18",
-						summary: "Comprehensive website performance optimization strategies to enhance user experience and search rankings",
-						url: "/blog/website-performance",
-						image: "/images/placeholder-2.jpg"
-					},
-					{
-						id: 103,
-						title: "Responsive Design Best Practices",
-						date: "2023-09-22",
-						summary: "Create responsive website designs that perform excellently across all devices",
-						url: "/blog/responsive-design",
-						image: "/images/placeholder-3.jpg"
-					}
-				]}
-			/>
-			<Stats id="stats" aria-label="Statistics section" />
+	<style>
+		/* 首页特定样式 */
+	</style>
+	<main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+		<div class="flex flex-col gap-12 md:gap-16">
+			<!-- Hero 部分 - 无边框 -->
+			<div class="rounded-box overflow-hidden shadow-lg">
+				<Hero id="hero" aria-label="Hero section" />
+			</div>
+
+			<!-- Notebook Kanban 部分 - 无边框 -->
+			<div class="rounded-box overflow-hidden">
+				<NotebookKanban id="notebook-kanban" aria-label="Notebook kanban board" />
+			</div>
+
+			<!-- 关键词云 - 单独一行 -->
+			<div class="rounded-box bg-base-100 shadow-md overflow-hidden">
+				<KeywordCloud id="keyword-cloud" aria-label="Keyword cloud visualization" />
+			</div>
+
+			<!-- 事件日历 - 单独一行 -->
+			<div class="rounded-box bg-base-100 overflow-hidden">
+				<EventCalendar
+					aria-label="Event calendar"
+					title="Upcoming Events"
+					description="Stay updated with our content calendar"
+					events={[
+						{
+							id: 1,
+							title: 'Content Planning Meeting',
+							date: '2025-04-24',
+							time: '10:00 AM',
+							summary: 'Discussion of next quarter content strategy and planning',
+							url: getPath('/blog/post-1')
+						},
+						{
+							id: 2,
+							title: 'Guest Writer Interview',
+							date: '2023-09-18',
+							time: '2:30 PM',
+							summary: 'Interview with industry expert on latest tech trends',
+							url: getPath('/blog/post-2')
+						},
+						{
+							id: 3,
+							title: 'SEO Workshop',
+							date: '2023-09-22',
+							time: '1:00 PM',
+							summary: 'Learn the latest SEO optimization techniques and strategies',
+							url: getPath('/blog/post-3')
+						},
+						{
+							id: 4,
+							title: 'Content Review Session',
+							date: '2023-09-25',
+							time: '11:00 AM',
+							summary: 'Review and optimize the performance of published content',
+							url: getPath('/blog/post-4')
+						},
+						{
+							id: 5,
+							title: 'Editorial Calendar Planning',
+							date: '2023-09-30',
+							time: '3:00 PM',
+							summary: 'Plan content publishing schedule for the next three months',
+							url: getPath('/blog/post-5')
+						},
+					]}
+					blogPosts={[
+						{
+							id: 101,
+							title: "Modern JavaScript Development Practices",
+							date: "2023-09-15",
+							summary: "Explore the latest JavaScript features and best practices to improve development efficiency",
+							url: getPath("/blog/javascript-modern-dev"),
+							image: getPath("/images/placeholder-1.jpg")
+						},
+						{
+							id: 102,
+							title: "Website Performance Optimization Guide",
+							date: "2023-09-18",
+							summary: "Comprehensive website performance optimization strategies to enhance user experience and search rankings",
+							url: getPath("/blog/website-performance"),
+							image: getPath("/images/placeholder-2.jpg")
+						},
+						{
+							id: 103,
+							title: "Responsive Design Best Practices",
+							date: "2023-09-22",
+							summary: "Create responsive website designs that perform excellently across all devices",
+							url: getPath("/blog/responsive-design"),
+							image: getPath("/images/placeholder-3.jpg")
+						}
+					]}
+				/>
+			</div>
+
+			<!-- 统计部分 - 渐变背景无边框 -->
+			<div class="rounded-box bg-gradient-to-r from-primary/10 to-secondary/10 shadow-md p-6">
+				<Stats id="stats" aria-label="Statistics section" />
+			</div>
+
+			<!-- 搜索区域 -->
+			<div class="rounded-box bg-base-100 shadow-md p-8">
+				<div class="text-center mb-8">
+					<h2 class="text-3xl font-bold text-primary mb-2">站内搜索</h2>
+					<p class="text-base-content/70">快速查找您需要的内容</p>
+				</div>
+				<div class="max-w-3xl mx-auto">
+					<Search id="search" className="mt-4" placeholder="输入关键词搜索..." />
+				</div>
+			</div>
 		</div>
-	</main> 
-	
-	{/* Floating menu component */}
-	<FloatingMenu 
-		modules={[
-			{ id: 'hero', title: 'Home', icon: 'BookOpen' },
-			{ id: 'notebook-kanban', title: 'Kanban', icon: 'BarChart3' },
-			{ id: 'event-calendar', title: 'Calendar', icon: 'Calendar' },
-		]}
-		availableThemes={[
-			{ value: 'valentine', label: 'Valentine', icon: 'Sun' },
-			{ value: 'dracula', label: 'Dracula', icon: 'Moon' },
-			{ value: 'winter', label: 'Winter', icon: 'Sun' },
-			{ value: 'synthwave', label: 'Synthwave', icon: 'Moon' },
-		]}
-	/>
+	</main>
 </BaseLayout>
+
+
+
+

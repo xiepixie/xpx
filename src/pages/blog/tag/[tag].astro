@@ -3,16 +3,17 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import FormattedDate from '../../../components/FormattedDate.astro';
 import '../../../styles/global.css';
+import { getPath } from '../../../lib/path';
 
 export async function getStaticPaths() {
     // 获取所有博客文章
     const allPosts = await getCollection('blog');
-    
+
     // 提取所有唯一标签并创建路径
     const uniqueTags = [...new Set(
         allPosts.flatMap(post => post.data.tags || [])
     )];
-    
+
     return uniqueTags.map(tag => ({
         params: { tag: tag.toLowerCase() },
         props: { tag }
@@ -44,14 +45,14 @@ const allTags = [...new Set(allPosts.flatMap(post => post.data.tags || []))];
             <header class="mb-12 text-center">
                 <h1 class="text-3xl sm:text-4xl font-bold mb-4">#{tag}</h1>
                 <p class="text-base-content/70">{pageDescription}</p>
-                
+
                 <div class="mt-8 flex flex-wrap gap-2 justify-center">
                     {allTags.map(tagItem => (
-                        <a 
-                            href={`/blog/tag/${tagItem.toLowerCase()}`} 
+                        <a
+                            href={getPath(`blog/tag/${tagItem.toLowerCase()}`)}
                             class={`px-4 py-2 rounded-full text-sm transition-colors ${
-                                tagItem.toLowerCase() === tag.toLowerCase() 
-                                    ? 'bg-primary text-primary-content' 
+                                tagItem.toLowerCase() === tag.toLowerCase()
+                                    ? 'bg-primary text-primary-content'
                                     : 'bg-base-200 hover:bg-base-300'
                             }`}
                         >
@@ -60,16 +61,16 @@ const allTags = [...new Set(allPosts.flatMap(post => post.data.tags || []))];
                     ))}
                 </div>
             </header>
-            
+
             <div class="grid grid-cols-1 gap-8 sm:grid-cols-2" id="blog-list">
                 {taggedPosts.length > 0 ? (
                     taggedPosts.map((post) => (
                         <div class="card bg-base-100 shadow-xl overflow-hidden">
                             <figure class="h-48 overflow-hidden">
                                 {post.data.seo_image && (
-                                    <img 
-                                        src={post.data.seo_image} 
-                                        alt={post.data.title} 
+                                    <img
+                                        src={getPath(post.data.seo_image)}
+                                        alt={post.data.title}
                                         class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                                     />
                                 )}
@@ -82,7 +83,7 @@ const allTags = [...new Set(allPosts.flatMap(post => post.data.tags || []))];
                                             <span>•</span>
                                             <div class="flex flex-wrap gap-1">
                                                 {post.data.tags.map(tagItem => (
-                                                    <a href={`/blog/tag/${tagItem.toLowerCase()}`} class="badge badge-primary">
+                                                    <a href={getPath(`blog/tag/${tagItem.toLowerCase()}`)} class="badge badge-primary">
                                                         {tagItem}
                                                     </a>
                                                 ))}
@@ -91,13 +92,13 @@ const allTags = [...new Set(allPosts.flatMap(post => post.data.tags || []))];
                                     )}
                                 </div>
                                 <h2 class="card-title text-xl font-bold">
-                                    <a href={`/blog/${post.slug}/`} class="hover:text-primary transition-colors">
+                                    <a href={getPath(`blog/${post.id}/`)} class="hover:text-primary transition-colors">
                                         {post.data.title}
                                     </a>
                                 </h2>
                                 <p class="mt-2 line-clamp-3">{post.data.description}</p>
                                 <div class="card-actions justify-end mt-4">
-                                    <a href={`/blog/${post.slug}/`} class="btn btn-sm btn-primary">
+                                    <a href={getPath(`blog/${post.id}/`)} class="btn btn-sm btn-primary">
                                         阅读全文 →
                                     </a>
                                 </div>
@@ -109,18 +110,18 @@ const allTags = [...new Set(allPosts.flatMap(post => post.data.tags || []))];
                         <div class="text-4xl mb-4">😢</div>
                         <h3 class="text-xl font-bold mb-2">暂无相关文章</h3>
                         <p class="text-base-content/70 mb-6">我们找不到与 "{tag}" 相关的文章</p>
-                        <a href="/blog" class="btn btn-primary">查看所有文章</a>
+                        <a href={getPath("blog")} class="btn btn-primary">查看所有文章</a>
                     </div>
                 )}
             </div>
-            
+
             {taggedPosts.length > 0 && (
                 <div class="mt-12 text-center">
-                    <a href="/blog" class="btn btn-outline">
+                    <a href={getPath("blog")} class="btn btn-outline">
                         查看所有文章
                     </a>
                 </div>
             )}
         </div>
     </main>
-</BaseLayout> 
+</BaseLayout>

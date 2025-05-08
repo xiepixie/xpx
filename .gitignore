@@ -1,24 +1,63 @@
-# build output
+# 构建输出
 dist/
-# generated types
+.output/
+.vercel/
+.netlify/
+
+# 生成的类型和缓存
 .astro/
+.cache/
+.temp/
+.turbo/
 
-# dependencies
+# 依赖
 node_modules/
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
 
-# logs
+# 日志
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+bun-debug.log*
+lerna-debug.log*
 
-
-# environment variables
+# 环境变量
 .env
-.env.production
+.env.*
+!.env.example
+!.env.project
 
-# macOS-specific files
+# 操作系统文件
 .DS_Store
+Thumbs.db
+desktop.ini
 
-# jetbrains setting folder
+# 编辑器目录和文件
 .idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 测试覆盖率报告
+coverage/
+
+# 搜索功能已移除
+
+# 临时文件
+*.tmp
+*.bak

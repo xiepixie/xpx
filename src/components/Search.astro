@@ -1,0 +1,242 @@
+---
+import { getPath } from '../lib/path';
+
+interface Props {
+  id?: string;
+  className?: string;
+  placeholder?: string;
+}
+
+const {
+  id = "search",
+  className = "",
+  placeholder = "输入关键词搜索..."
+} = Astro.props;
+
+// 获取基础路径
+const basePath = import.meta.env.PUBLIC_USE_BASE_PATH ? `/${import.meta.env.PUBLIC_BASE_PATH}` : '';
+---
+
+<div id={id} class={`search-container ${className}`}>
+  <!-- 搜索UI将由JavaScript动态生成 -->
+  <div class="search-loading flex justify-center items-center py-8">
+    <div class="loading loading-spinner loading-lg text-primary"></div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ basePath, searchId: id, placeholder }}>
+  // 确保全局变量存在
+  if (!window.hasOwnProperty('xpxBlogBasePath')) {
+    window.xpxBlogBasePath = basePath || '';
+  }
+
+  document.addEventListener('DOMContentLoaded', async function() {
+    const searchContainer = document.getElementById(searchId);
+    if (!searchContainer) return;
+
+    try {
+      console.log('初始化Pagefind搜索...');
+
+      // 获取基础路径
+      const basePathValue = window.xpxBlogBasePath || '';
+      console.log('基础路径:', basePathValue);
+
+      // 1. 首先加载pagefind.js核心文件
+      const pagefindScript = document.createElement('script');
+      /* @vite-ignore */
+      pagefindScript.src = `${basePathValue}/pagefind/pagefind.js`;
+      pagefindScript.type = 'module';
+
+      // 检测当前环境
+      const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      console.log('当前环境:', isDev ? '开发模式' : '生产模式');
+
+      // 等待pagefind.js加载完成
+      await new Promise((resolve, reject) => {
+        pagefindScript.onload = resolve;
+        pagefindScript.onerror = (e) => {
+          console.error('加载pagefind.js失败:', e);
+          searchContainer.innerHTML = `
+            <div class="alert alert-error">
+              <p>搜索功能加载失败，无法加载核心文件。</p>
+              <p>尝试加载的路径: ${basePathValue}/pagefind/pagefind.js</p>
+            </div>
+          `;
+          reject(e);
+        };
+        document.body.appendChild(pagefindScript);
+      }).catch(err => {
+        throw new Error('Pagefind核心文件加载失败: ' + err);
+      });
+
+      // 2. 初始化pagefind
+      const pagefind = await import(`${basePathValue}/pagefind/pagefind.js`);
+
+      // 设置Pagefind选项
+      await pagefind.options({
+        highlightParam: "highlight",
+        // 在开发模式下，明确设置bundlePath以确保索引文件能正确加载
+        bundlePath: isDev ? `${window.location.origin}${basePathValue}/pagefind/` : undefined
+      });
+
+      console.log('Pagefind初始化完成，bundlePath:', isDev ? `${window.location.origin}${basePathValue}/pagefind/` : '默认');
+
+      // 3. 创建自定义搜索UI
+      searchContainer.innerHTML = `
+        <div class="search-ui">
+          <div class="relative mb-4">
+            <input
+              id="${searchId}-input"
+              class="input input-bordered w-full pl-10"
+              type="text"
+              placeholder="${placeholder}"
+            />
+            <div class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/60">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.3-4.3"/>
+              </svg>
+            </div>
+            <button id="${searchId}-clear" class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/60 hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
+                <path d="M18 6 6 18"/>
+                <path d="m6 6 12 12"/>
+              </svg>
+            </button>
+          </div>
+          <div id="${searchId}-results" class="search-results space-y-4 min-h-[200px]">
+            <div class="flex justify-center items-center h-[200px] text-base-content/50">
+              <p>输入关键词开始搜索</p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // 4. 获取DOM元素
+      const searchInput = document.getElementById(`${searchId}-input`);
+      const searchClear = document.getElementById(`${searchId}-clear`);
+      const resultsContainer = document.getElementById(`${searchId}-results`);
+
+      if (!searchInput || !searchClear || !resultsContainer) {
+        throw new Error('搜索UI元素未找到');
+      }
+
+      // 5. 搜索处理函数
+      async function handleSearch() {
+        const query = searchInput.value.trim();
+
+        // 显示/隐藏清除按钮
+        searchClear.style.display = query ? 'block' : 'none';
+
+        if (!query) {
+          resultsContainer.innerHTML = `
+            <div class="flex justify-center items-center h-[200px] text-base-content/50">
+              <p>输入关键词开始搜索</p>
+            </div>
+          `;
+          return;
+        }
+
+        // 显示加载状态
+        resultsContainer.innerHTML = `
+          <div class="flex justify-center items-center h-[200px]">
+            <div class="loading loading-spinner loading-md text-primary"></div>
+          </div>
+        `;
+
+        try {
+          // 执行搜索
+          const search = await pagefind.search(query);
+
+          if (search.results.length === 0) {
+            resultsContainer.innerHTML = `
+              <div class="alert">
+                <p>未找到与 "${query}" 相关的内容</p>
+              </div>
+            `;
+            return;
+          }
+
+          // 获取搜索结果
+          const results = await Promise.all(search.results.map(result => result.data()));
+
+          // 构建结果HTML
+          let resultsHTML = `
+            <div class="mb-4 text-sm text-base-content/70">
+              找到 ${results.length} 个与 "${query}" 相关的结果
+            </div>
+          `;
+
+          // 遍历结果
+          results.forEach(({ url, meta, excerpt }) => {
+            // 确保URL在开发模式下也能正确工作
+            let finalUrl = url;
+            if (isDev && !url.startsWith('http')) {
+              // 在开发模式下，确保URL包含正确的基础路径
+              finalUrl = url.startsWith('/') ? `${basePathValue}${url}` : `${basePathValue}/${url}`;
+            }
+
+            resultsHTML += `
+              <div class="card bg-base-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="card-body p-4">
+                  <h3 class="card-title text-lg">
+                    <a href="${finalUrl}?highlight=${encodeURIComponent(query)}" class="link link-hover text-primary">
+                      ${meta.title || '无标题'}
+                    </a>
+                  </h3>
+                  <p class="text-sm text-base-content/80">${excerpt.replaceAll('<mark', '<mark class="bg-primary/20 text-primary font-medium px-1 rounded"')}</p>
+                </div>
+              </div>
+            `;
+          });
+
+          // 更新结果容器
+          resultsContainer.innerHTML = resultsHTML;
+
+        } catch (error) {
+          console.error('搜索出错:', error);
+          resultsContainer.innerHTML = `
+            <div class="alert alert-error">
+              <p>搜索过程中出错: ${error.message}</p>
+            </div>
+          `;
+        }
+      }
+
+      // 6. 添加事件监听器
+      searchInput.addEventListener('input', debounce(handleSearch, 300));
+      searchClear.addEventListener('click', () => {
+        searchInput.value = '';
+        searchClear.style.display = 'none';
+        resultsContainer.innerHTML = `
+          <div class="flex justify-center items-center h-[200px] text-base-content/50">
+            <p>输入关键词开始搜索</p>
+          </div>
+        `;
+      });
+
+      // 防抖函数
+      function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+      }
+
+    } catch (error) {
+      console.error('初始化搜索组件失败:', error);
+      searchContainer.innerHTML = `
+        <div class="alert alert-error">
+          <p>搜索功能初始化失败: ${error.message}</p>
+        </div>
+      `;
+    }
+  });
+</script>
+
+<style>
+  .search-container {
+    min-height: 300px;
+  }
+</style>

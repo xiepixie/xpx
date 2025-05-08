@@ -19,10 +19,12 @@ Avatar.displayName = 'Avatar'
 const AvatarImage = React.forwardRef<
     HTMLImageElement,
     React.ImgHTMLAttributes<HTMLImageElement>
->(({ className, ...props }, ref) => (
-    <img
+>(({ className, alt = "Avatar image", ...props }, ref) => (
+    // biome-ignore lint/a11y/useAltText: <explanation>
+<img
         ref={ref}
         className={cn('aspect-square h-full w-full', className)}
+        alt={alt}
         {...props}
     />
 ))

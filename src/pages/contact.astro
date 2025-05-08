@@ -9,151 +9,196 @@ const pageDescription = "如果您有任何问题或建议，欢迎通过以下�
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
-    <main class="container mx-auto px-4 py-12">
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="max-w-5xl mx-auto">
-            <h1 class="text-3xl sm:text-4xl font-bold mb-6">{pageTitle}</h1>
-            <p class="text-base-content/70 text-lg mb-12 max-w-3xl">{pageDescription}</p>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-                <div class="card bg-base-100 shadow-xl border border-base-300 text-center p-6">
-                    <div class="mx-auto rounded-full bg-primary/10 p-4 mb-4">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl sm:text-5xl font-bold mb-4 text-primary">{pageTitle}</h1>
+                <p class="text-base-content/80 text-lg max-w-3xl mx-auto">{pageDescription}</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+                <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 border border-base-300 text-center p-6">
+                    <div class="mx-auto rounded-full bg-primary/10 p-4 mb-4 transform transition-transform duration-300 hover:scale-110">
                         <Mail className="h-6 w-6 text-primary" />
                     </div>
                     <h3 class="font-bold text-lg mb-2">电子邮件</h3>
-                    <p class="text-base-content/70">随时向我们发送电子邮件，我们会尽快回复您</p>
-                    <a href="mailto:contact@example.com" class="link link-primary mt-4">contact@example.com</a>
+                    <p class="text-base-content/70 mb-4">收到后我们会尽快回复您</p>
+                    <a href="mailto:contact@example.com" class="btn btn-sm btn-outline btn-primary">contact@example.com</a>
                 </div>
-                
-                <div class="card bg-base-100 shadow-xl border border-base-300 text-center p-6">
-                    <div class="mx-auto rounded-full bg-primary/10 p-4 mb-4">
-                        <Phone className="h-6 w-6 text-primary" />
+
+                <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 border border-base-300 text-center p-6">
+                    <div class="mx-auto rounded-full bg-secondary/10 p-4 mb-4 transform transition-transform duration-300 hover:scale-110">
+                        <Phone className="h-6 w-6 text-secondary" />
                     </div>
                     <h3 class="font-bold text-lg mb-2">电话</h3>
-                    <p class="text-base-content/70">工作日 9:00-18:00 为您提供电话支持</p>
-                    <a href="tel:+86123456789" class="link link-primary mt-4">+86 123 4567 890</a>
+                    <p class="text-base-content/70 mb-4">工作日 9:00-18:00 为您提供电话支持</p>
+                    <a href="tel:+86123456789" class="btn btn-sm btn-outline btn-secondary">+86 123 4567 890</a>
                 </div>
-                
-                <div class="card bg-base-100 shadow-xl border border-base-300 text-center p-6">
-                    <div class="mx-auto rounded-full bg-primary/10 p-4 mb-4">
-                        <MapPin className="h-6 w-6 text-primary" />
+
+                <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 border border-base-300 text-center p-6">
+                    <div class="mx-auto rounded-full bg-accent/10 p-4 mb-4 transform transition-transform duration-300 hover:scale-110">
+                        <MapPin className="h-6 w-6 text-accent" />
                     </div>
                     <h3 class="font-bold text-lg mb-2">地址</h3>
-                    <p class="text-base-content/70">中国上海市浦东新区张江高科技园区</p>
-                    <a href="https://maps.google.com" target="_blank" class="link link-primary mt-4">查看地图</a>
+                    <p class="text-base-content/70 mb-4">中国上海市浦东新区张江高科技园区</p>
+                    <a href="https://maps.google.com" target="_blank" class="btn btn-sm btn-outline btn-accent">查看地图</a>
                 </div>
             </div>
-            
+
             <!-- 联系表单 -->
-            <div class="card bg-base-100 shadow-xl border border-base-300 p-6 lg:p-8" id="contact-form">
-                <h2 class="text-2xl font-bold mb-6">发送消息</h2>
-                <form class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 border border-base-300 p-6 lg:p-8" id="contact-form">
+                <div class="card-body p-0">
+                    <h2 class="text-2xl font-bold mb-6 text-center sm:text-left">发送消息</h2>
+                    <form class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-medium">姓名</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    class="input input-bordered w-full focus:input-primary transition-all duration-300"
+                                    placeholder="您的姓名"
+                                    required
+                                />
+                            </div>
+
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-medium">电子邮件</span>
+                                </label>
+                                <input
+                                    type="email"
+                                    class="input input-bordered w-full focus:input-primary transition-all duration-300"
+                                    placeholder="您的电子邮件"
+                                    required
+                                />
+                            </div>
+                        </div>
+
                         <div class="form-control w-full">
                             <label class="label">
-                                <span class="label-text">姓名</span>
+                                <span class="label-text font-medium">主题</span>
                             </label>
-                            <input type="text" class="input input-bordered w-full" placeholder="您的姓名" required />
+                            <input
+                                type="text"
+                                class="input input-bordered w-full focus:input-primary transition-all duration-300"
+                                placeholder="消息主题"
+                                required
+                            />
                         </div>
-                        
+
                         <div class="form-control w-full">
-                            <label class="label">
-                                <span class="label-text">电子邮件</span>
-                            </label>
-                            <input type="email" class="input input-bordered w-full" placeholder="您的电子邮件" required />
+                            <textarea
+                                class="textarea"
+                                placeholder="请输入您的消息..."
+                                required
+                            ></textarea>
                         </div>
-                    </div>
-                    
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">主题</span>
-                        </label>
-                        <input type="text" class="input input-bordered w-full" placeholder="消息主题" required />
-                    </div>
-                    
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">消息</span>
-                        </label>
-                        <textarea class="textarea textarea-bordered h-32" placeholder="请输入您的消息..." required></textarea>
-                    </div>
-                    
-                    <div class="form-control">
-                        <label class="label cursor-pointer justify-start gap-2">
-                            <input type="checkbox" class="checkbox checkbox-primary" required />
-                            <span class="label-text">我同意隐私政策和服务条款</span>
-                        </label>
-                    </div>
-                    
-                    <div class="text-right">
-                        <Button client:load variant="primary" className="px-6" type="submit">
-                            <Send className="mr-2 h-4 w-4" />
-                            发送消息
-                        </Button>
-                    </div>
-                </form>
+
+                        <div class="form-control">
+                            <label class="label cursor-pointer justify-start gap-2 hover:bg-base-200 p-2 rounded-lg transition-colors duration-200">
+                                <input type="checkbox" class="checkbox checkbox-primary" required />
+                                <span class="label-text">我同意<a href="#" class="link link-primary">隐私政策</a>和<a href="#" class="link link-primary">服务条款</a></span>
+                            </label>
+                        </div>
+
+                        <div class="flex justify-center sm:justify-end mt-8">
+                            <Button client:load variant="primary" className="px-8 py-2" type="submit">
+                                <Send className="mr-2 h-4 w-4" />
+                                发送消息
+                            </Button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            
+
             <!-- FAQ 部分 -->
-            <div class="mt-16" id="faq">
-                <h2 class="text-2xl font-bold mb-6">常见问题</h2>
-                
-                <div class="space-y-4">
-                    <div class="collapse collapse-arrow bg-base-100 border border-base-300 rounded-lg">
-                        <input type="radio" name="my-accordion-2" checked="checked" /> 
-                        <div class="collapse-title text-xl font-medium">
+            <div class="mt-20" id="faq">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold mb-4">常见问题</h2>
+                    <p class="text-base-content/70 max-w-2xl mx-auto">以下是我们收到的一些常见问题的答案。如果您有其他问题，请随时联系我们。</p>
+                </div>
+
+                <div class="space-y-4 max-w-3xl mx-auto">
+                    <div class="collapse collapse-plus bg-base-100 border border-base-300 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+                        <input type="radio" name="my-accordion-2" checked="checked" />
+                        <div class="collapse-title text-lg font-medium text-primary">
                             如何订阅您的博客更新？
                         </div>
-                        <div class="collapse-content"> 
-                            <p>您可以通过我们网站上的RSS订阅功能或在首页底部输入您的电子邮件地址来订阅我们的博客更新。每当有新文章发布时，您都会收到通知。</p>
+                        <div class="collapse-content prose">
+                            <p>您可以通过以下方式订阅我们的博客更新：</p>
+                            <ul>
+                                <li>在网站首页底部输入您的电子邮件地址</li>
+                                <li>使用RSS订阅功能</li>
+                                <li>关注我们的社交媒体账号获取最新动态</li>
+                            </ul>
+                            <p>每当有新文章发布时，您都会收到通知。</p>
                         </div>
                     </div>
-                    
-                    <div class="collapse collapse-arrow bg-base-100 border border-base-300 rounded-lg">
-                        <input type="radio" name="my-accordion-2" /> 
-                        <div class="collapse-title text-xl font-medium">
+
+                    <div class="collapse collapse-plus bg-base-100 border border-base-300 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+                        <input type="radio" name="my-accordion-2" />
+                        <div class="collapse-title text-lg font-medium text-primary">
                             我可以投稿到您的博客吗？
                         </div>
-                        <div class="collapse-content"> 
-                            <p>当然可以！我们欢迎高质量的客座投稿。请通过上面的联系表单发送您的提案，包括您的主题和简短的大纲。我们会在收到后尽快回复您。</p>
+                        <div class="collapse-content prose">
+                            <p>当然可以！我们欢迎高质量的客座投稿。请通过上面的联系表单发送您的提案，包括：</p>
+                            <ul>
+                                <li>您的主题和简短大纲</li>
+                                <li>您的专业背景和写作经验</li>
+                                <li>相关的写作样本或发表过的文章链接</li>
+                            </ul>
+                            <p>我们会在收到后尽快回复您。</p>
                         </div>
                     </div>
-                    
-                    <div class="collapse collapse-arrow bg-base-100 border border-base-300 rounded-lg">
-                        <input type="radio" name="my-accordion-2" /> 
-                        <div class="collapse-title text-xl font-medium">
+
+                    <div class="collapse collapse-plus bg-base-100 border border-base-300 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+                        <input type="radio" name="my-accordion-2" />
+                        <div class="collapse-title text-lg font-medium text-primary">
                             您提供内容定制服务吗？
                         </div>
-                        <div class="collapse-content"> 
-                            <p>是的，我们提供内容定制服务。如果您需要针对特定主题的专业内容，请联系我们讨论您的需求和预算。我们的团队将为您提供量身定制的解决方案。</p>
+                        <div class="collapse-content prose">
+                            <p>是的，我们提供内容定制服务。如果您需要针对特定主题的专业内容，请联系我们讨论您的需求和预算。我们的服务包括：</p>
+                            <ul>
+                                <li>技术博客文章和教程</li>
+                                <li>行业分析报告</li>
+                                <li>产品说明文档</li>
+                                <li>营销内容和案例研究</li>
+                            </ul>
+                            <p>我们的团队将为您提供量身定制的解决方案。</p>
+                            <div class="mt-4">
+                                <a href="#contact-form" class="btn btn-sm btn-outline btn-primary">联系我们了解更多</a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-    
-    <FloatingMenu 
+
+    <FloatingMenu
         modules={[
             { id: 'contact-form', title: '联系表单', icon: 'MessageSquare' },
             { id: 'faq', title: '常见问题', icon: 'BookOpen' },
         ]}
     />
-    
+
     <script>
         // 简单的表单提交处理
         document.addEventListener('astro:page-load', () => {
             const contactForm = document.querySelector('form');
-            
+
             contactForm?.addEventListener('submit', (e) => {
                 e.preventDefault();
-                
+
                 // 模拟表单提交
                 const submitButton = contactForm.querySelector('button');
                 if (submitButton) {
                     submitButton.setAttribute('disabled', 'true');
                     submitButton.innerHTML = '<span class="loading loading-spinner loading-xs mr-2"></span> 发送中...';
                 }
-                
+
                 // 模拟请求延迟
                 setTimeout(() => {
                     // 显示成功消息
@@ -176,4 +221,4 @@ const pageDescription = "如果您有任何问题或建议，欢迎通过以下�
             });
         });
     </script>
-</BaseLayout> 
+</BaseLayout>

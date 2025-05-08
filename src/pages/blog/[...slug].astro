@@ -3,19 +3,38 @@ import { type CollectionEntry, getCollection } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
 import { render } from 'astro:content';
 
+
 export async function getStaticPaths() {
-	const posts = await getCollection('blog');
+	const posts = await getCollection('blog', ({ data }) => {
+		// 在生产环境中过滤掉草稿文章
+		return import.meta.env.PROD ? !data.draft : true;
+	});
+
 	return posts.map((post) => ({
 		params: { slug: post.id },
-		props: post,
+		props: { post },
 	}));
 }
-type Props = CollectionEntry<'blog'>;
 
-const post = Astro.props;
-const { Content } = await render(post);
+interface Props {
+	post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { Content, headings, remarkPluginFrontmatter } = await render(post);
+
+// 检查文件类型，针对MDX文件应用特殊处理
+const isMdxFile = post.id.endsWith('.mdx');
+
+// 获取文章元数据
+const { title, description, publish_date, update_date, tags, seo_image, author } = post.data;
+
+// 获取阅读时间
+const minutesRead = remarkPluginFrontmatter.minutesRead;
 ---
 
-<BlogPost {...post.data}>
-	<Content />
+<BlogPost {...post.data} readingTime={minutesRead} headings={headings}>
+	<div class={isMdxFile ? "mdx-content prose-code" : ""}>
+		<Content />
+	</div>
 </BlogPost>

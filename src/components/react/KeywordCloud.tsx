@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import type React from 'react'
 import { cn } from '../../lib/utils'
 import { Tag, X, Link as LinkIcon } from './Icons'
 import { motion, AnimatePresence } from 'framer-motion'
+import { getPath } from '../../lib/path'
 
 // Define the type for a single tag
-type Tag = {
+type TagItem = {
     id: string
     label: string
     count?: number
@@ -13,7 +15,7 @@ type Tag = {
 
 // Define the props for the KeywordCloud component
 export interface KeywordCloudProps {
-    tags: Tag[]
+    tags: TagItem[]
     baseUrl?: string // 博客标签页的基础URL
 }
 
@@ -21,17 +23,19 @@ const KeywordCloudReact: React.FC<KeywordCloudProps> = ({
     tags,
     baseUrl = '/blog/tag',
 }) => {
-    const [selectedTags, setSelectedTags] = useState<Tag[]>([])
+    const [selectedTags, setSelectedTags] = useState<TagItem[]>([])
     const selectedsContainerRef = useRef<HTMLDivElement>(null)
 
     const removeSelectedTag = (id: string) => {
         setSelectedTags((prev) => prev.filter((tag) => tag.id !== id))
     }
 
-    const addSelectedTag = (tag: Tag) => {
+    const addSelectedTag = (tag: TagItem) => {
         setSelectedTags((prev) => [...prev, tag])
     }
 
+    const selectedTagsLength = selectedTags.length;
+    
     useEffect(() => {
         if (selectedsContainerRef.current) {
             selectedsContainerRef.current.scrollTo({
@@ -39,7 +43,7 @@ const KeywordCloudReact: React.FC<KeywordCloudProps> = ({
                 behavior: 'smooth',
             })
         }
-    }, [selectedTags])
+    }, [selectedTagsLength])
 
     // 动画变体
     const containerVariants = {
@@ -134,13 +138,14 @@ const KeywordCloudReact: React.FC<KeywordCloudProps> = ({
                                 </motion.span>
                                 <div className="flex gap-1">
                                     <a
-                                        href={`${baseUrl}/${tag.id}`}
+                                        href={getPath(`${baseUrl}/${tag.id}`)}
                                         className="p-1 rounded-full hover:bg-base-200 text-primary"
                                         title="查看相关博客文章"
                                     >
                                         <LinkIcon className="size-4" />
                                     </a>
                                     <button
+                                        type="button"
                                         onClick={() =>
                                             removeSelectedTag(tag.id)
                                         }
@@ -184,6 +189,7 @@ const KeywordCloudReact: React.FC<KeywordCloudProps> = ({
                                 )
                                 .map((tag) => (
                                     <motion.button
+                                        type="button"
                                         key={tag.id}
                                         layoutId={`tag-${tag.id}`}
                                         initial="hidden"
@@ -223,7 +229,7 @@ const KeywordCloudReact: React.FC<KeywordCloudProps> = ({
                             {selectedTags.map((tag) => (
                                 <motion.a
                                     key={`blog-${tag.id}`}
-                                    href={`${baseUrl}/${tag.id}`}
+                                    href={getPath(`${baseUrl}/${tag.id}`)}
                                     className="card p-4 border shadow-sm hover:shadow-md transition-shadow"
                                     initial={{ scale: 0.95, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}

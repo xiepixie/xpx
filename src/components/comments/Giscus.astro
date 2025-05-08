@@ -1,10 +1,10 @@
 ---
 interface Props {
-  repo: string;
-  repoId: string;
-  category: string;
-  categoryId: string;
-  mapping: string;
+  repo?: string;
+  repoId?: string;
+  category?: string;
+  categoryId?: string;
+  mapping?: string;
   term?: string;
   reactionsEnabled?: boolean;
   emitMetadata?: boolean;
@@ -16,11 +16,17 @@ interface Props {
   title?: string;
 }
 
+// 从环境变量获取默认值
+const defaultRepo = import.meta.env.GISCUS_REPO || 'paxie/xpx_blog';
+const defaultRepoId = import.meta.env.GISCUS_REPO_ID || 'R_kgDOLjm_UQ';
+const defaultCategory = import.meta.env.GISCUS_CATEGORY || 'Comments';
+const defaultCategoryId = import.meta.env.GISCUS_CATEGORY_ID || 'DIC_kwDOLjm_Uc4Cd5vO';
+
 const {
-  repo,
-  repoId,
-  category,
-  categoryId,
+  repo = defaultRepo,
+  repoId = defaultRepoId,
+  category = defaultCategory,
+  categoryId = defaultCategoryId,
   mapping = "pathname",
   term = "",
   reactionsEnabled = true,
@@ -37,6 +43,7 @@ const {
 <section class="giscus-comments mt-10 pt-8 border-t border-base-300">
   {showTitle && <h3 class="text-xl font-semibold mb-6">{title}</h3>}
   <script
+    is:inline
     src="https://giscus.app/client.js"
     data-repo={repo}
     data-repo-id={repoId}
@@ -59,4 +66,4 @@ const {
   .giscus-comments {
     width: 100%;
   }
-</style> 
+</style>

@@ -84,7 +84,7 @@ try {
         decoding={decoding}
         class="w-full h-full object-cover"
         sizes={sizes}
-        onerror="this.onerror=null; this.src=window.location.origin + import.meta.env.BASE_URL + 'blog-placeholder-5.jpg';"
+        onerror="this.onerror=null; this.src=window.location.origin + (document.documentElement.dataset.basePath ? '/' + document.documentElement.dataset.basePath : '') + '/blog-placeholder-5.jpg';"
     />
 </div>
 
@@ -93,6 +93,7 @@ try {
     console.log(`[Image Debug] Original: ${src}`)
     console.log(`[Image Debug] Processed: ${imageSrc}`)
     console.log(`[Image Debug] BASE_URL: ${import.meta.env.BASE_URL}`)
+    console.log(`[Image Debug] data-base-path: ${document.documentElement.dataset.basePath || ''}`)
 </script>
 
 <style>

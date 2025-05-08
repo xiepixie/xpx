@@ -1,7 +1,9 @@
 ---
 title: "Markdown Style Guide"
 description: "Here is a sample of some basic Markdown syntax that can be used when writing Markdown content in Astro."
-publish_date: "2024-07-01"
+publish_date: "2025-04-25"
+update_date: "2025-04-25"
+tags: ["markdown", "syntax", "guide", "tutorial"]
 seo_image: "/blog-placeholder-1.jpg"
 ---
 
@@ -35,12 +37,12 @@ Itatur? Quiatae cullecum rem ent aut odis in re eossequodi nonsequ idebis ne sap
 ### Syntax
 
 ```markdown
-![Alt text](./full/or/relative/path/of/image)
+![Alt text](/blog-placeholder-about.jpg)
 ```
 
 ### Output
 
-![blog placeholder](/blog-placeholder-about.jpg)
+![blog placeholder](/xpx/blog-placeholder-about.jpg)
 
 ## Blockquotes
 
@@ -51,13 +53,13 @@ The blockquote element represents content that is quoted from another source, op
 #### Syntax
 
 ```markdown
-> Tiam, ad mint andaepu dandae nostion secatur sequo quae.  
+> Tiam, ad mint andaepu dandae nostion secatur sequo quae.
 > **Note** that you can use _Markdown syntax_ within a blockquote.
 ```
 
 #### Output
 
-> Tiam, ad mint andaepu dandae nostion secatur sequo quae.  
+> Tiam, ad mint andaepu dandae nostion secatur sequo quae.
 > **Note** that you can use _Markdown syntax_ within a blockquote.
 
 ### Blockquote with attribution

@@ -1,4 +1,4 @@
-import React from 'react'
+import type React from 'react'
 import type { ComponentType } from 'react'
 import { Badge } from './Badge' // Assuming Badge is in the same react directory
 import { MoveUpRight, MoveDownLeft } from './Icons' // Assuming Icons are in the same react directory
@@ -70,7 +70,7 @@ const StatsReact: React.FC<StatsProps> = ({
                             <Badge>{badgeText}</Badge>
                         </div>
                         <div className="flex gap-2 flex-col">
-                            <h2 className="text-xl md:text-3xl md:text-4xl tracking-tighter lg:max-w-xl font-regular text-left">
+                            <h2 className="text-xl md:text-3xl  tracking-tighter lg:max-w-xl font-regular text-left">
                                 {title}
                             </h2>
                             <p className="text-lg lg:max-w-sm leading-relaxed tracking-tight text-muted-foreground text-left">
@@ -88,7 +88,7 @@ const StatsReact: React.FC<StatsProps> = ({
                                         : 'text-destructive'
                                 return (
                                     <div
-                                        key={index}
+                                        key={`stat-${stat.label.replace(/\s+/g, '-').toLowerCase()}`}
                                         className="flex gap-0 flex-col justify-between p-6 border rounded-md"
                                     >
                                         <IconComponent

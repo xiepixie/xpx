@@ -1,0 +1,58 @@
+/* Pagefind 搜索样式 */
+
+/* 搜索容器 */
+.search-container {
+  min-height: 300px;
+}
+
+/* 搜索结果卡片 */
+.card.bg-base-200 {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card.bg-base-200:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* 搜索结果标记 */
+mark.bg-primary\/20 {
+  padding: 0 0.25rem;
+  border-radius: 0.25rem;
+}
+
+/* 搜索输入框 */
+#search-input:focus {
+  outline: none;
+  border-color: hsl(var(--p));
+  box-shadow: 0 0 0 2px hsla(var(--p) / 0.2);
+}
+
+/* 搜索图标位置 */
+.absolute.left-3 {
+  pointer-events: none;
+}
+
+/* 清除按钮 */
+#search-clear:hover {
+  color: hsl(var(--p));
+}
+
+/* 搜索结果容器 */
+.search-results {
+  transition: opacity 0.3s ease;
+}
+
+/* 加载状态 */
+.search-loading {
+  transition: opacity 0.3s ease;
+}
+
+/* 高亮样式 */
+.pagefind-highlight mark {
+  background-color: rgba(var(--p), 0.2);
+  color: hsl(var(--p));
+  padding: 0 2px;
+  border-radius: 2px;
+  font-weight: 500;
+}

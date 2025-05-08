@@ -1,16 +1,34 @@
 ---
-import type { HTMLAttributes } from 'astro/types'
+import type { HTMLAttributes } from 'astro/types';
+import { getPath } from '../lib/path';
+import { baseUrl } from '../lib/config';
 
 type Props = HTMLAttributes<'a'>
 
-const { href, class: className, ...props } = Astro.props
-const pathname = Astro.url.pathname.replace(import.meta.env.BASE_URL, '')
-const subpath = pathname.match(/[^\/]+/g)
-const isActive = href === pathname || href === `/${subpath?.[0] || ''}`
+const { href, class: className, ...props } = Astro.props;
+
+// 获取当前路径名，并移除 base URL
+const pathname = Astro.url.pathname.replace(baseUrl.replace(/\/$/, ''), '');
+const subpath = pathname.match(/[^\/]+/g);
+
+// 处理 href，确保应用正确的基础路径
+// 如果 href 是完整 URL（以 http 开头），则不处理
+let processedHref = href;
+if (typeof href === 'string' && !href.startsWith('http')) {
+  processedHref = getPath(href);
+}
+
+// 确定链接是否为当前活跃页面
+const hrefWithoutBase = typeof href === 'string' ? href.replace(/^\//, '') : '';
+const isActive = 
+  href === pathname || 
+  (href === '/' && pathname === '') || 
+  (href !== '/' && pathname.startsWith(hrefWithoutBase)) ||
+  href === `/${subpath?.[0] || ''}`;
 ---
 
-<a href={href} class:list={[className, { active: isActive }]} {...props}>
-    <slot />
+<a href={processedHref} class:list={[className, { active: isActive }]} {...props}>
+	<slot />
 </a>
 <style>
     a {

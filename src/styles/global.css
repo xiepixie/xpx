@@ -1,16 +1,23 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes:
-    winter  ,
-    valentine --default,
+/* biome-ignore lint/correctness/noUnknownProperty: <explanation> */
+themes:
+    winter ,
+    valentine ,
     dracula ,
     synthwave --prefersdark;
 }
+@plugin "@tailwindcss/typography";
 
+/* 导入Pagefind样式 */
+@import "./pagefind.css";
+
+@layer base {
+  /* 基础样式层 */
+}
 /* 自定义样式 */
 body {
   min-height: 100vh;
-  font-family: sans-serif;
 }
 
 /* 触发重新布局的临时类 */
@@ -37,5 +44,318 @@ body {
     opacity: 0.5;
   }
 }
+
+/* 搜索相关样式优化 */
+.enhanced-search-container {
+  position: relative;
+  width: 100%;
+}
+
+/* 搜索动画效果 */
+.search-animation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.search-animation.active {
+  opacity: 1;
+}
+
+.search-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: hsl(var(--p) / 0.2);
+  animation: search-pulse 1.5s ease-in-out infinite;
+}
+
+.search-wave {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px solid hsl(var(--p) / 0.3);
+  animation: search-wave 2s ease-in-out infinite;
+}
+
+
+
+/* 重置代码块样式，但保留基本盒模型 */
+pre, code {
+  box-sizing: border-box;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+}
+
+/* 确保在 MDX 中内联代码也正确显示 */
+.prose code:not(.astro-code code),
+.mdx-content code:not(.astro-code code) {
+  background-color: rgba(214, 51, 108, 0.1) !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 0.25rem !important;
+  font-size: 0.875em !important;
+  color: #d6336c !important;
+  font-weight: normal !important;
+}
+
+
+/* 代码块标题 */
+.code-title {
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-bottom: 1px solid;
+  display: flex;
+  align-items: center;
+}
+
+/* 亮色主题标题 */
+.theme-light .code-title {
+  background-color: #e8e8e8;
+  color: #333;
+  border-color: #ddd;
+}
+
+/* 暗色主题标题 */
+.theme-dark .code-title {
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+  border-color: #3d3d3d;
+}
+
+
+/* 代码行 */
+.code-line {
+  display: flex;
+  min-height: 1.5rem;
+  padding: 0 1rem;
+}
+
+/* 代码行悬停效果 */
+.code-line:hover {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+/* 高亮行 */
+.code-line.highlighted {
+  background-color: rgba(255, 255, 0, 0.05);
+}
+
+/* 亮色主题高亮行 */
+.theme-light .code-line.highlighted {
+  background-color: rgba(255, 213, 0, 0.1);
+  border-left: 2px solid #f59e0b;
+}
+
+/* 暗色主题高亮行 */
+.theme-dark .code-line.highlighted {
+  background-color: rgba(255, 213, 0, 0.05);
+  border-left: 2px solid #f59e0b;
+}
+
+/* 行号 */
+.line-number {
+  user-select: none;
+  text-align: right;
+  min-width: 2.5rem;
+  margin-right: 1rem;
+  color: #888;
+}
+
+/* 亮色主题行号 */
+.theme-light .line-number {
+  color: #999;
+}
+
+/* 暗色主题行号 */
+.theme-dark .line-number {
+  color: #777;
+}
+
+/* 代码内容 */
+.line-content {
+  flex: 1;
+}
+
+/* 复制按钮 */
+.copy-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: transparent;
+  color: #888;
+  border: none;
+  border-radius: 0.25rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+/* 有标题时的复制按钮位置 */
+.has-title .copy-button {
+  top: 0.5rem;
+}
+
+/* 亮色主题复制按钮 */
+.theme-light .copy-button {
+  color: #666;
+}
+
+.theme-light .copy-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+/* 暗色主题复制按钮 */
+.theme-dark .copy-button {
+  color: #aaa;
+}
+
+.theme-dark .copy-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* 复制成功状态 */
+.copy-button.copied {
+  color: #10b981 !important;
+}
+
+/* 语法高亮 - 亮色主题 */
+.theme-light .token.comment,
+.theme-light .token.prolog,
+.theme-light .token.doctype,
+.theme-light .token.cdata {
+  color: #5c6370;
+}
+
+.theme-light .token.punctuation {
+  color: #5c6370;
+}
+
+.theme-light .token.property,
+.theme-light .token.tag,
+.theme-light .token.boolean,
+.theme-light .token.number,
+.theme-light .token.constant,
+.theme-light .token.symbol,
+.theme-light .token.deleted {
+  color: #e45649;
+}
+
+.theme-light .token.selector,
+.theme-light .token.attr-name,
+.theme-light .token.string,
+.theme-light .token.char,
+.theme-light .token.builtin,
+.theme-light .token.inserted {
+  color: #50a14f;
+}
+
+.theme-light .token.operator,
+.theme-light .token.entity,
+.theme-light .token.url,
+.theme-light .language-css .token.string,
+.theme-light .style .token.string {
+  color: #986801;
+}
+
+.theme-light .token.atrule,
+.theme-light .token.attr-value,
+.theme-light .token.keyword {
+  color: #a626a4;
+}
+
+.theme-light .token.function,
+.theme-light .token.class-name {
+  color: #4078f2;
+}
+
+.theme-light .token.regex,
+.theme-light .token.important,
+.theme-light .token.variable {
+  color: #c18401;
+}
+
+/* 语法高亮 - 暗色主题 */
+.theme-dark .token.comment,
+.theme-dark .token.prolog,
+.theme-dark .token.doctype,
+.theme-dark .token.cdata {
+  color: #6a9955;
+}
+
+.theme-dark .token.punctuation {
+  color: #d4d4d4;
+}
+
+.theme-dark .token.property,
+.theme-dark .token.tag,
+.theme-dark .token.boolean,
+.theme-dark .token.number,
+.theme-dark .token.constant,
+.theme-dark .token.symbol,
+.theme-dark .token.deleted {
+  color: #ce9178;
+}
+
+.theme-dark .token.selector,
+.theme-dark .token.attr-name,
+.theme-dark .token.string,
+.theme-dark .token.char,
+.theme-dark .token.builtin,
+.theme-dark .token.inserted {
+  color: #b5cea8;
+}
+
+.theme-dark .token.operator,
+.theme-dark .token.entity,
+.theme-dark .token.url,
+.theme-dark .language-css .token.string,
+.theme-dark .style .token.string {
+  color: #d4d4d4;
+}
+
+.theme-dark .token.atrule,
+.theme-dark .token.attr-value,
+.theme-dark .token.keyword {
+  color: #569cd6;
+}
+
+.theme-dark .token.function,
+.theme-dark .token.class-name {
+  color: #dcdcaa;
+}
+
+.theme-dark .token.regex,
+.theme-dark .token.important,
+.theme-dark .token.variable {
+  color: #9cdcfe;
+}
+
+
+
+
+
+
 
 

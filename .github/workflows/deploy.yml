@@ -1,14 +1,22 @@
-name: Deploy to GitHub Pages
+name: 部署到 GitHub Pages
 
 on:
-  # 每次推送到main分支时触发工作流
-  # 如果使用不同的分支名称，请将'main'替换为您的分支名称
+  # 每次推送到 `xpx` 分支时触发这个工作流程
   push:
     branches: [ xpx ]
-  # 允许从GitHub上的Actions选项卡手动运行此工作流
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
+  # 允许在 GitHub 上的 Actions 标签中手动触发
   workflow_dispatch:
 
-# 允许此作业克隆存储库并创建页面部署
+# 设置并发限制，确保同一分支上的工作流不会同时运行
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# 允许工作流克隆仓库并创建页面部署
 permissions:
   contents: read
   pages: write
@@ -16,24 +24,81 @@ permissions:
 
 jobs:
   build:
+    name: 构建站点
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout your repository using git
+      - name: 检出代码
         uses: actions/checkout@v4
-      - name: Install, build, and upload your site
-        uses: withastro/action@v3
-        # with:
-          # path: . # 存储库中Astro项目的根路径位置。(可选)
-          # node-version: 20 # 应用于构建站点的Node特定版本。默认为20。(可选)
-          # package-manager: pnpm@latest # 应用于安装依赖项并构建站点的Node包管理器。根据您的锁文件自动检测。(可选)
+        with:
+          fetch-depth: 0 # 获取完整历史以便生成正确的最后修改日期
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: 设置 pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          run_install: false
+
+      - name: 获取 pnpm 缓存目录
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: 缓存依赖
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+            node_modules
+            .astro
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: 安装依赖
+        run: pnpm install
+
+      - name: 构建站点
+        run: pnpm run build
+        env:
+          # 设置环境变量
+          PUBLIC_USE_BASE_PATH: true
+          PUBLIC_BASE_PATH: xpx
+          SITE_URL: https://xiepixie.github.io
+
+      - name: 上传构建产物
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+          retention-days: 30
 
   deploy:
+    name: 部署站点
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
+      - name: 设置 Pages
+        uses: actions/configure-pages@v5
+
+      - name: 部署到 GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4 
+        uses: actions/deploy-pages@v4
+        with:
+          timeout: 600000 # 10分钟超时
+
+      - name: 部署结果通知
+        if: always()
+        run: |
+          if [ "${{ steps.deployment.outcome }}" == "success" ]; then
+            echo "✅ 部署成功! 站点已更新: ${{ steps.deployment.outputs.page_url }}"
+          else
+            echo "❌ 部署失败! 请检查日志获取更多信息。"
+          fi

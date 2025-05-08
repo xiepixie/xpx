@@ -8,92 +8,152 @@ const pageDescription = "了解我们的团队和使命";
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription}>
-	<main class="container mx-auto px-4 py-8">
-		<div class="prose prose-lg mx-auto">
-			<h1 class="text-3xl sm:text-4xl font-bold mb-8">关于我们</h1>
-			
-			<div class="space-y-6">
-				<section id="mission">
-					<h2 class="text-2xl font-semibold">我们的使命</h2>
-					<p>
-						我们致力于创建高质量、易于理解的技术内容，帮助开发者和设计师提升技能，跟上行业最新发展。我们相信知识共享和开源精神，希望通过我们的平台为技术社区做出贡献。
-					</p>
-				</section>
-				
-				<section id="team">
-					<h2 class="text-2xl font-semibold">我们的团队</h2>
-					<p>
-						我们的团队由经验丰富的开发者、设计师和内容创作者组成，他们在各自领域都有深厚的专业知识和实践经验。团队成员来自不同的背景，带来多元化的视角和创新思维。
-					</p>
-					
-					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-						<div class="card bg-base-100 shadow-xl">
-							<figure class="px-6 pt-6">
-								<img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" alt="团队成员" class="rounded-xl h-48 w-full object-cover" />
-							</figure>
-							<div class="card-body">
-								<h3 class="card-title">张小明</h3>
-								<p class="text-sm text-base-content/70">创始人 & 首席技术官</p>
-								<p>10年全栈开发经验，热爱分享技术知识和最佳实践。</p>
+	<main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+		<div class="max-w-5xl mx-auto">
+			<div class="text-center mb-16">
+				<h1 class="text-4xl sm:text-5xl font-bold mb-4 text-primary">关于我们</h1>
+				<p class="text-base-content/70 text-lg max-w-3xl mx-auto">了解我们的团队、使命和价值观</p>
+			</div>
+
+			<div class="space-y-16">
+				<section id="mission" class="bg-base-100 p-8 rounded-box shadow-lg border border-base-300">
+					<div class="flex flex-col md:flex-row gap-8 items-center">
+						<div class="md:w-1/3">
+							<div class="rounded-full bg-primary/10 p-8 inline-flex">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+								</svg>
 							</div>
 						</div>
-						
-						<div class="card bg-base-100 shadow-xl">
-							<figure class="px-6 pt-6">
-								<img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" alt="团队成员" class="rounded-xl h-48 w-full object-cover" />
-							</figure>
-							<div class="card-body">
-								<h3 class="card-title">李晓华</h3>
-								<p class="text-sm text-base-content/70">内容总监</p>
-								<p>专注于创建易于理解的技术教程和深度分析文章。</p>
-							</div>
-						</div>
-						
-						<div class="card bg-base-100 shadow-xl">
-							<figure class="px-6 pt-6">
-								<img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" alt="团队成员" class="rounded-xl h-48 w-full object-cover" />
-							</figure>
-							<div class="card-body">
-								<h3 class="card-title">王大力</h3>
-								<p class="text-sm text-base-content/70">UI/UX 设计师</p>
-								<p>专注于创建美观且用户友好的数字体验。</p>
+						<div class="md:w-2/3">
+							<h2 class="text-3xl font-bold mb-4 text-center md:text-left">我们的使命</h2>
+							<p class="text-lg leading-relaxed">
+								我们致力于创建<span class="text-primary font-medium">高质量、易于理解的技术内容</span>，帮助开发者和设计师提升技能，跟上行业最新发展。我们相信知识共享和开源精神，希望通过我们的平台为技术社区做出贡献。
+							</p>
+							<div class="mt-6 flex flex-wrap gap-4">
+								<div class="badge badge-lg badge-primary">知识共享</div>
+								<div class="badge badge-lg badge-secondary">技术创新</div>
+								<div class="badge badge-lg badge-accent">社区贡献</div>
 							</div>
 						</div>
 					</div>
 				</section>
-				
-				<section id="contact">
-					<h2 class="text-2xl font-semibold">联系我们</h2>
-					<p>
-						我们欢迎您的反馈和建议。如果您有任何问题或合作意向，请随时联系我们。
+
+				<section id="team" class="pt-8">
+					<h2 class="text-3xl font-bold mb-6 text-center">我们的团队</h2>
+					<p class="text-lg text-base-content/80 text-center max-w-3xl mx-auto mb-12">
+						我们的团队由经验丰富的开发者、设计师和内容创作者组成，他们在各自领域都有深厚的专业知识和实践经验。团队成员来自不同的背景，带来多元化的视角和创新思维。
 					</p>
-					
-					<div class="card bg-base-100 shadow-xl mt-6">
-						<div class="card-body">
+
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-6">
+						<div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-base-300">
+							<figure class="px-6 pt-6">
+								<img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" alt="张小明" class="rounded-xl h-56 w-full object-cover" />
+							</figure>
+							<div class="card-body">
+								<h3 class="card-title text-xl">张小明</h3>
+								<div class="badge badge-primary">创始人 & 首席技术官</div>
+								<p class="mt-2">10年全栈开发经验，热爱分享技术知识和最佳实践。专注于Web性能优化和现代JavaScript框架。</p>
+								<div class="card-actions justify-end mt-4">
+									<a href="#" class="btn btn-sm btn-outline btn-primary">了解更多</a>
+								</div>
+							</div>
+						</div>
+
+						<div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-base-300">
+							<figure class="px-6 pt-6">
+								<img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" alt="李晓华" class="rounded-xl h-56 w-full object-cover" />
+							</figure>
+							<div class="card-body">
+								<h3 class="card-title text-xl">李晓华</h3>
+								<div class="badge badge-secondary">内容总监</div>
+								<p class="mt-2">专注于创建易于理解的技术教程和深度分析文章。擅长将复杂概念简化为清晰易懂的内容。</p>
+								<div class="card-actions justify-end mt-4">
+									<a href="#" class="btn btn-sm btn-outline btn-primary">了解更多</a>
+								</div>
+							</div>
+						</div>
+
+						<div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-base-300">
+							<figure class="px-6 pt-6">
+								<img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" alt="王大力" class="rounded-xl h-56 w-full object-cover" />
+							</figure>
+							<div class="card-body">
+								<h3 class="card-title text-xl">王大力</h3>
+								<div class="badge badge-accent">UI/UX 设计师</div>
+								<p class="mt-2">专注于创建美观且用户友好的数字体验。擅长用户研究和交互设计，注重细节和可用性。</p>
+								<div class="card-actions justify-end mt-4">
+									<a href="#" class="btn btn-sm btn-outline btn-primary">了解更多</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<section id="contact" class="bg-base-100 p-8 rounded-box shadow-lg border border-base-300 mt-16">
+					<div class="flex flex-col md:flex-row gap-8 items-center">
+						<div class="md:w-1/3">
+							<div class="rounded-full bg-accent/10 p-8 inline-flex">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+								</svg>
+							</div>
+						</div>
+						<div class="md:w-2/3">
+							<h2 class="text-3xl font-bold mb-4 text-center md:text-left">联系我们</h2>
+							<p class="text-lg leading-relaxed mb-6">
+								我们欢迎您的反馈和建议。如果您有任何问题或合作意向，请随时联系我们。我们的团队将尽快回复您。
+							</p>
+
 							<form class="space-y-4">
-								<div class="form-control">
-									<label class="label">
-										<span class="label-text">您的姓名</span>
-									</label>
-									<input type="text" placeholder="请输入您的姓名" class="input input-bordered" />
+								<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+									<div class="form-control w-full">
+										<label class="label">
+											<span class="label-text font-medium">您的姓名</span>
+										</label>
+										<input
+											type="text"
+											placeholder="请输入您的姓名"
+											class="input input-bordered w-full focus:input-accent transition-all duration-300"
+										/>
+									</div>
+
+									<div class="form-control w-full">
+										<label class="label">
+											<span class="label-text font-medium">电子邮箱</span>
+										</label>
+										<input
+											type="email"
+											placeholder="请输入您的电子邮箱"
+											class="input input-bordered w-full focus:input-accent transition-all duration-300"
+										/>
+									</div>
 								</div>
-								
-								<div class="form-control">
+
+								<div class="form-control w-full">
 									<label class="label">
-										<span class="label-text">电子邮箱</span>
+										<span class="label-text font-medium">留言内容</span>
 									</label>
-									<input type="email" placeholder="请输入您的电子邮箱" class="input input-bordered" />
+									<textarea
+										class="textarea textarea-bordered h-32 focus:textarea-accent transition-all duration-300"
+										placeholder="请输入您的留言内容"
+									></textarea>
 								</div>
-								
+
 								<div class="form-control">
-									<label class="label">
-										<span class="label-text">留言内容</span>
+									<label class="label cursor-pointer justify-start gap-2 hover:bg-base-200 p-2 rounded-lg transition-colors duration-200">
+										<input type="checkbox" class="checkbox checkbox-accent" />
+										<span class="label-text">我同意接收最新的博客更新和通讯</span>
 									</label>
-									<textarea class="textarea textarea-bordered h-24" placeholder="请输入您的留言内容"></textarea>
 								</div>
-								
-								<div class="form-control mt-6">
-									<button class="btn btn-primary">发送留言</button>
+
+								<div class="flex justify-center md:justify-end mt-6">
+									<button class="btn btn-accent px-8">
+										<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+										</svg>
+										发送留言
+									</button>
 								</div>
 							</form>
 						</div>
@@ -102,8 +162,8 @@ const pageDescription = "了解我们的团队和使命";
 			</div>
 		</div>
 	</main>
-	
-	<FloatingMenu 
+
+	<FloatingMenu
 		modules={[
 			{ id: 'mission', title: '使命', icon: 'BookOpen' },
 			{ id: 'team', title: '团队', icon: 'BarChart3' },

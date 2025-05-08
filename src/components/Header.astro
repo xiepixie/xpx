@@ -1,10 +1,8 @@
 ---
-import { useState, useEffect } from 'react';
-import { Button } from './react/Button';
-import { User, Sun, Moon, Menu as MenuIcon, X as XIcon, ChevronDown } from './react/Icons';
-import clsx from 'clsx';
+import { X as XIcon, ChevronDown } from './react/Icons';
 import { cn } from '../lib/utils';
-
+import { getPath } from '../lib/path';
+import SearchModal from './SearchModal.astro';
 
 interface NavItem {
 	to?: string;
@@ -26,43 +24,44 @@ export interface Props {
 	initialTheme?: 'valentine' | 'dracula' | 'winter' | 'synthwave';
 }
 
+
 const {
 	logoText = "xpxBlog",
 	menuItems = [
 		{
 			text: "Home",
-			to: ""
+			to: "/"
 		},
 		{
 			text: "Blog",
 			to: "/blog"
 		},
 		{
-			text: "Categories",
+			text: "专栏",
 			items: [
 				{
-					text: "Technology",
-					description: "Latest tech news and reviews",
+					text: "技术",
+					description: "最新技术新闻和评测",
 					to: "/blog/tag/technology",
 				},
 				{
-					text: "Marketing",
-					description: "Digital marketing strategies",
+					text: "营销",
+					description: "数字营销策略",
 					to: "/blog/tag/marketing",
 				},
 				{
-					text: "Design",
-					description: "UI/UX and graphic design",
-					to: "/blog/tag/design",
+					text: "教程",
+					description: "UI/UX和图形设计",
+					to: "/blog/tag/tutorial",
 				},
 				{
 					text: "SEO",
-					description: "Search engine optimization tips",
+					description: "搜索引擎优化技巧",
 					to: "/blog/tag/seo",
 				},
 				{
-					text: "Content",
-					description: "Content creation and management",
+					text: "内容",
+					description: "内容创作和管理",
 					to: "/blog/tag/content",
 				}
 			]
@@ -76,505 +75,607 @@ const {
 			to: "/contact"
 		}
 	],
-	initialTheme = 'valentine'
 } = Astro.props;
 
-// 定义新的主题列表，与 theme-controller 对应
+// 确保所有菜单项的链接都使用正确的基础路径
+const processedMenuItems = menuItems.map(item => {
+    if (item.to !== undefined) {
+        return {
+            ...item,
+            to: item.to ? getPath(item.to) : getPath('')
+        };
+    }
+
+    if (item.items) {
+        return {
+            ...item,
+            items: item.items.map(subItem => ({
+                ...subItem,
+                to: getPath(subItem.to)
+            }))
+        };
+    }
+
+    return item;
+});
+
+// 定义主题配置
 const themes = [
-    { value: 'valentine', label: '浪漫粉' },
-    { value: 'dracula', label: '暗黑' },
-    { value: 'winter', label: '冬日' },
-    { value: 'synthwave', label: '赛博朋克' },
-    // 你可以根据需要添加更多 DaisyUI 主题
+    { value: 'valentine', label: '浪漫粉', icon: '🌸' },
+    { value: 'dracula', label: '暗黑', icon: '🦇' },
+    { value: 'winter', label: '冬日', icon: '❄️' },
+    { value: 'synthwave', label: '赛博朋克', icon: '🌃' },
 ];
+
 ---
 
-{/* 主题预加载脚本 - 放在头部防止闪烁 */}
-<script is:inline>
-    (function() {
-        // 页面加载前立即应用主题，防止闪烁
-        try {
-            const getStoredTheme = function() {
-                return localStorage.getItem('theme') || 'valentine';
-            };
-            
-            const applyTheme = function(theme) {
-                document.documentElement.setAttribute('data-theme', theme);
-                document.documentElement.classList.toggle('dark', 
-                    ['dracula', 'synthwave', 'dark', 'night', 'coffee'].includes(theme));
-            };
-            
-            // 在DOM解析前就应用主题
-            const currentTheme = getStoredTheme();
-            applyTheme(currentTheme);
-        } catch (e) {
-            console.error('Theme preload error:', e);
-        }
-    })();
-</script>
 
 <script>
+	// 为 window 对象添加 openLoginModal 方法的类型定义
+	declare global {
+		interface Window {
+			openLoginModal: () => void;
+		}
+	}
+
 	document.addEventListener('astro:page-load', () => {
-		const mobileMenuButton = document.getElementById('mobile-menu-button');
-		const mobileMenuButtonMobile = document.getElementById('login-button-mobile');
-		const mobileMenu = document.getElementById('mobile-menu');
-		const loginButton = document.getElementById('login-button');
-		const loginModal = document.getElementById('login-modal');
-		const closeModalButton = document.getElementById('close-modal');
+
+		// 登录模态框处理
+		const loginModal = document.getElementById('login-modal') as HTMLDialogElement;
 		const loginForm = document.getElementById('login-form') as HTMLFormElement;
-		const dropdownButtons = document.querySelectorAll('.dropdown-button');
-		const dropdownMenus = document.querySelectorAll('.dropdown-menu');
 
-		// --- 主题切换逻辑 (使用 theme-controller) ---
-		const getStoredTheme = (): string => {
-            try {
-                return localStorage.getItem('theme') || 'valentine';
-            } catch (error) {
-                console.error('Error reading theme from localStorage:', error);
-                return 'valentine';
-            }
-        };
+		// --- 主题切换逻辑 (使用 IndexedDB) ---
+		// IndexedDB配置
+		const DB_NAME = 'xpxBlogThemeDB';
+		const DB_VERSION = 1;
+		const THEME_STORE = 'themes';
+		const THEME_KEY = 'currentTheme';
+		const DEFAULT_THEME = 'winter';
 
-		const applyTheme = (theme: string) => {
+		// 从IndexedDB获取主题
+		const getThemeFromIndexedDB = (): Promise<string> => {
+			return new Promise((resolve) => {
+				try {
+					const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+					request.onerror = () => {
+						console.error('[Header] 打开IndexedDB失败，尝试备用方法');
+						resolve(getFallbackTheme());
+					};
+
+					request.onsuccess = (event) => {
+						try {
+							const db = (event.target as IDBOpenDBRequest).result;
+							const transaction = db.transaction([THEME_STORE], 'readonly');
+							const store = transaction.objectStore(THEME_STORE);
+							const getRequest = store.get(THEME_KEY);
+
+							getRequest.onsuccess = (event) => {
+								const result = (event.target as IDBRequest).result;
+								if (result && result.value) {
+									console.log('[Header] 从IndexedDB获取主题:', result.value);
+									resolve(result.value);
+								} else {
+									console.log('[Header] IndexedDB中未找到主题，使用备用方法');
+									resolve(getFallbackTheme());
+								}
+							};
+
+							getRequest.onerror = () => {
+								console.error('[Header] 从IndexedDB获取主题失败，尝试备用方法');
+								resolve(getFallbackTheme());
+							};
+
+							transaction.oncomplete = () => {
+								db.close();
+							};
+						} catch (error) {
+							console.error('[Header] IndexedDB事务错误:', error);
+							resolve(getFallbackTheme());
+						}
+					};
+
+					request.onupgradeneeded = (event) => {
+						const db = (event.target as IDBOpenDBRequest).result;
+						if (!db.objectStoreNames.contains(THEME_STORE)) {
+							db.createObjectStore(THEME_STORE, { keyPath: 'id' });
+							console.log('[Header] 主题存储对象创建成功');
+						}
+					};
+				} catch (error) {
+					console.error('[Header] IndexedDB操作失败:', error);
+					resolve(getFallbackTheme());
+				}
+			});
+		};
+
+		// 获取备用主题（从localStorage或cookie）
+		const getFallbackTheme = (): string => {
+			try {
+				// 尝试从localStorage获取
+				const localTheme = localStorage.getItem('theme');
+				if (localTheme) {
+					return localTheme;
+				}
+
+				// 尝试从cookie获取
+				const themeCookie = document.cookie
+					.split('; ')
+					.find(row => row.startsWith('theme='));
+
+				if (themeCookie) {
+					return themeCookie.split('=')[1];
+				}
+			} catch (e) {
+				console.error('[Header] 获取备用主题失败:', e);
+			}
+
+			// 默认主题
+			return DEFAULT_THEME;
+		};
+
+		// 获取存储的主题 - 优先使用IndexedDB，然后回退到localStorage和cookie
+		const getStoredTheme = async (): Promise<string> => {
+			try {
+				// 尝试从IndexedDB获取
+				const theme = await getThemeFromIndexedDB();
+				return theme;
+			} catch (error) {
+				console.error('[Header] 从IndexedDB获取主题失败，尝试备用方法:', error);
+				return getFallbackTheme();
+			}
+		};
+
+		// 保存主题到IndexedDB
+		const saveThemeToIndexedDB = (theme: string): Promise<void> => {
+			return new Promise((resolve, reject) => {
+				try {
+					const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+					request.onerror = (event) => {
+						console.error('[Header] 打开IndexedDB失败:', event);
+						reject(new Error('无法打开主题数据库'));
+					};
+
+					request.onsuccess = (event) => {
+						const db = (event.target as IDBOpenDBRequest).result;
+						const transaction = db.transaction([THEME_STORE], 'readwrite');
+						const store = transaction.objectStore(THEME_STORE);
+
+						const themeData = {
+							id: THEME_KEY,
+							value: theme,
+							timestamp: Date.now()
+						};
+
+						const putRequest = store.put(themeData);
+
+						putRequest.onsuccess = () => {
+							console.log('[Header] 主题已保存到IndexedDB:', theme);
+							resolve();
+						};
+
+						putRequest.onerror = (event) => {
+							console.error('[Header] 保存主题到IndexedDB失败:', event);
+							reject(new Error('保存主题失败'));
+						};
+
+						transaction.oncomplete = () => {
+							db.close();
+						};
+					};
+
+					request.onupgradeneeded = (event) => {
+						const db = (event.target as IDBOpenDBRequest).result;
+						if (!db.objectStoreNames.contains(THEME_STORE)) {
+							db.createObjectStore(THEME_STORE, { keyPath: 'id' });
+						}
+					};
+				} catch (error) {
+					console.error('[Header] IndexedDB操作失败:', error);
+					reject(error);
+				}
+			});
+		};
+
+		// 全面保存主题到所有存储位置
+		const saveThemeEverywhere = async (theme: string): Promise<void> => {
+			try {
+				// 保存到IndexedDB
+				await saveThemeToIndexedDB(theme);
+
+				// 同时保存到localStorage作为备份
+				localStorage.setItem('theme', theme);
+
+				// 同时保存到cookie (7天过期)
+				const expiryDate = new Date();
+				expiryDate.setDate(expiryDate.getDate() + 7);
+				document.cookie = `theme=${theme}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
+
+				console.log('[Header] 主题已保存到所有存储位置:', theme);
+			} catch (error) {
+				console.error('[Header] 保存主题失败:', error);
+				// 出错时至少尝试保存到localStorage
+				try {
+					localStorage.setItem('theme', theme);
+				} catch (e) {
+					console.error('[Header] 回退到localStorage也失败:', e);
+				}
+			}
+		};
+
+		const applyTheme = (theme: string): void => {
+			// 安全检查，确保文档已准备好
+			if (!document || !document.documentElement) {
+				console.warn('[Header] 文档尚未准备好，无法应用主题');
+				return;
+			}
+
+			// 设置 data-theme 属性
 			document.documentElement.setAttribute('data-theme', theme);
-			// 根据常见暗色主题名称判断是否添加 dark 类
-			document.documentElement.classList.toggle('dark', ['dracula', 'synthwave', 'dark', 'night', 'coffee'].includes(theme));
-            
-            // 强制重新应用样式以确保所有组件正确刷新
-            const bodyElement = document.body;
-            if (bodyElement) {
-                // 添加临时类触发重新布局
-                bodyElement.classList.add('theme-refreshing');
-                
-                // 在下一帧移除临时类触发重新渲染
-                requestAnimationFrame(() => {
-                    bodyElement.classList.remove('theme-refreshing');
-                });
-            }
+
+			// 根据暗色主题名称判断是否添加 dark 类
+			const darkThemes = ['dracula', 'synthwave', 'dark', 'night', 'coffee'];
+			document.documentElement.classList.toggle('dark', darkThemes.includes(theme));
+
+			// 强制重新应用样式以确保所有组件正确刷新
+			if (document.body) {
+				// 添加临时类触发重新布局
+				document.body.classList.add('theme-refreshing');
+
+				// 在下一帧移除临时类触发重新渲染
+				requestAnimationFrame(() => {
+					document.body.classList.remove('theme-refreshing');
+				});
+			}
+
+			// 防止可能的扩展冲突
+			setTimeout(() => {
+				// 再次确认主题已正确应用
+				if (document.documentElement.getAttribute('data-theme') !== theme) {
+					console.warn('[Header] 主题应用可能被干扰，重新应用');
+					document.documentElement.setAttribute('data-theme', theme);
+				}
+			}, 100);
 		};
 
 		// 初始化主题
-		const currentTheme = getStoredTheme();
-		applyTheme(currentTheme);
+		const initTheme = async (): Promise<void> => {
+			try {
+				const theme = await getStoredTheme();
+				applyTheme(theme);
+
+				// 设置初始选中状态
+				const themeControllers = document.querySelectorAll('input[name="theme-buttons"]');
+				themeControllers.forEach(controller => {
+					const radio = controller as HTMLInputElement;
+					if (radio.value === theme) {
+						radio.checked = true;
+					}
+				});
+			} catch (error) {
+				console.error('[Header] 初始化主题失败:', error);
+				// 出错时使用默认主题
+				applyTheme(DEFAULT_THEME);
+			}
+		};
+
+		// 初始化主题
+		initTheme();
 
 		// 监听 theme-controller 变化并持久化
-		const themeControllers = document.querySelectorAll('input[name="theme-buttons"]');
-		themeControllers.forEach(controller => {
-			const radio = controller as HTMLInputElement;
-			// 设置初始选中状态
-			if (radio.value === currentTheme) {
-				radio.checked = true;
-			}
+		document.addEventListener('change', (e) => {
+			const target = e.target as HTMLInputElement;
+			if (target.name === 'theme-buttons' && target.classList.contains('theme-controller')) {
+				const newTheme = target.value;
+				console.log('[Header] 主题变更:', newTheme);
 
-			radio.addEventListener('change', (e) => {
-				const newTheme = (e.target as HTMLInputElement).value;
-				applyTheme(newTheme); // 应用新主题
-				try {
-					localStorage.setItem('theme', newTheme); // 保存到 localStorage
-					
-					// 触发主题变化事件，通知其他组件（如FloatingMenu）
-                    const themeChangedEvent = new CustomEvent('theme-changed', {
-                        detail: { theme: newTheme },
-                        bubbles: true
-                    });
-                    document.dispatchEvent(themeChangedEvent);
-				} catch (error) {
-					console.error('Error saving theme to localStorage:', error);
-				}
-			});
+				// 保存主题
+				saveThemeEverywhere(newTheme);
+
+				// 应用新主题
+				applyTheme(newTheme);
+
+				// 触发主题变化事件，通知其他组件
+				const themeChangedEvent = new CustomEvent('theme-changed', {
+					detail: { theme: newTheme },
+					bubbles: true
+				});
+				document.dispatchEvent(themeChangedEvent);
+			}
 		});
 		// --- 主题切换逻辑结束 ---
 
-		// 移动菜单切换
-		if (mobileMenuButton && mobileMenu) { // 添加 mobileMenu 存在性检查
-			mobileMenuButton.addEventListener('click', (e) => {
-                e.stopPropagation(); // 阻止事件冒泡到 document click listener
-				mobileMenu.classList.toggle('hidden');
-                // 可选：切换按钮图标
-                // const icon = mobileMenuButton.querySelector('svg');
-                // if (icon) {
-                //     // 这里需要根据 hidden 状态切换 XIcon 和 MenuIcon 的 SVG 内容或类名
-                // }
+		// 确保登录模态框正确初始化
+		if (loginModal) {
+			// 添加打开模态框的方法
+			window.openLoginModal = () => {
+				try {
+					if (loginModal && typeof loginModal.showModal === 'function') {
+						loginModal.showModal();
+					} else {
+						console.error('[Header] 登录模态框不支持 showModal 方法');
+					}
+				} catch (error) {
+					console.error('[Header] 打开登录模态框时出错:', error);
+				}
+			};
+
+			// 处理登录表单提交
+			loginForm?.addEventListener('submit', (e) => {
+				e.preventDefault();
+				const formData = new FormData(loginForm);
+				const email = formData.get('email');
+				const password = formData.get('password');
+
+				// 这里添加登录逻辑，例如API调用
+				console.log('[Header] 登录尝试:', { email, password });
+
+				// 模拟登录成功
+				alert('登录成功！');
+
+				// 安全地关闭模态框
+				try {
+					if (loginModal && typeof loginModal.close === 'function') {
+						loginModal.close();
+					}
+				} catch (error) {
+					console.error('[Header] 关闭登录模态框时出错:', error);
+				}
 			});
+		} else {
+			console.warn('[Header] 登录模态框元素未找到');
 		}
 
-		// 登录模态框处理
-		const openLoginModal = () => {
-			loginModal?.classList.remove('hidden');
-		};
+		// 为移动端下拉菜单添加动画效果
+		const detailsElements = document.querySelectorAll('details');
+		detailsElements.forEach(details => {
+			// 添加过渡动画
+			details.addEventListener('toggle', () => {
+				const summary = details.querySelector('summary');
+				const content = details.querySelector('ul');
 
-        const closeLoginModal = () => {
-            loginModal?.classList.add('hidden');
-        };
+				if (details.open) {
+					// 打开时的动画
+					if (summary) {
+						const chevron = summary.querySelector('svg');
+						if (chevron) {
+							chevron.classList.add('rotate-180');
+							chevron.style.transform = 'rotate(180deg)';
+						}
+					}
 
-		loginButton?.addEventListener('click', openLoginModal);
-		mobileMenuButtonMobile?.addEventListener('click', () => {
-            openLoginModal();
-            mobileMenu?.classList.add('hidden'); // 打开登录框时关闭移动菜单
-        });
+					if (content) {
+						content.classList.add('animate-fadeIn');
+					}
+				} else {
+					// 关闭时的动画
+					if (summary) {
+						const chevron = summary.querySelector('svg');
+						if (chevron) {
+							chevron.classList.remove('rotate-180');
+							chevron.style.transform = 'rotate(0deg)';
+						}
+					}
 
-		closeModalButton?.addEventListener('click', closeLoginModal);
-
-		// 处理登录表单提交
-		loginForm?.addEventListener('submit', (e) => {
-			e.preventDefault();
-			const formData = new FormData(loginForm);
-			const email = formData.get('email');
-			const password = formData.get('password');
-
-			// 这里添加登录逻辑，例如API调用
-			console.log('Login attempt:', { email, password });
-
-			// 模拟登录成功
-			alert('登录成功！');
-			closeLoginModal();
+					if (content) {
+						content.classList.remove('animate-fadeIn');
+					}
+				}
+			});
 		});
 
-		// 点击模态框外部关闭
-		loginModal?.addEventListener('click', (e) => {
-			if (e.target === loginModal) {
-				closeLoginModal();
+		// 添加全局样式以支持动画 - 使用更安全的方式
+		try {
+			// 检查是否已存在相同ID的样式元素
+			const styleId = 'header-animation-styles';
+			let styleElement = document.getElementById(styleId) as HTMLStyleElement;
+
+			// 如果不存在，创建新的样式元素
+			if (!styleElement) {
+				styleElement = document.createElement('style');
+				styleElement.id = styleId;
+				styleElement.textContent = `
+					@keyframes fadeIn {
+						from { opacity: 0; transform: translateY(-10px); }
+						to { opacity: 1; transform: translateY(0); }
+					}
+					.animate-fadeIn {
+						animation: fadeIn 0.2s ease-out forwards;
+					}
+					.dropdown-content {
+						transform-origin: top;
+						transition: transform 0.2s ease, opacity 0.2s ease;
+					}
+					summary svg {
+						transition: transform 0.3s ease;
+					}
+				`;
+
+				// 安全地添加到文档
+				if (document.head) {
+					document.head.appendChild(styleElement);
+				} else if (document.body) {
+					// 如果 head 不可用，尝试添加到 body
+					document.body.appendChild(styleElement);
+				} else {
+					console.warn('[Header] 无法添加动画样式：document.head 和 document.body 均不可用');
+				}
 			}
-		});
-
-		// 移动端下拉菜单处理
-		dropdownButtons.forEach((button, index) => {
-			button.addEventListener('click', (e) => {
-				e.preventDefault();
-				e.stopPropagation();
-
-				const menu = dropdownMenus[index];
-                const isHidden = menu.classList.contains('hidden');
-
-				// 先关闭其他所有菜单
-				dropdownMenus.forEach((otherMenu, otherIndex) => {
-                    if (otherIndex !== index) {
-					    otherMenu.classList.add('hidden');
-                    }
-				});
-
-				// 切换当前菜单
-                if (isHidden) {
-                    menu.classList.remove('hidden');
-                } else {
-                    menu.classList.add('hidden');
-                }
-			});
-		});
-
-		// 点击页面其他地方关闭移动菜单和下拉菜单
-		document.addEventListener('click', (e) => {
-            // 关闭移动菜单
-            if (mobileMenu && !mobileMenu.contains(e.target as Node) && mobileMenuButton && !mobileMenuButton.contains(e.target as Node)) {
-                mobileMenu.classList.add('hidden');
-            }
-
-            // 关闭下拉菜单
-			dropdownMenus.forEach((menu) => {
-                // 检查点击是否发生在菜单或其触发按钮内部
-                const correspondingButton = Array.from(dropdownButtons).find((btn, idx) => dropdownMenus[idx] === menu);
-                if (!menu.contains(e.target as Node) && correspondingButton && !correspondingButton.contains(e.target as Node)) {
-				    menu.classList.add('hidden');
-                }
-			});
-		});
-
-        // 搜索逻辑
-        const searchInputs = document.querySelectorAll('input[type="text"][placeholder="Search blog..."]');
-        const searchButtons = document.querySelectorAll('button.btn-primary.join-item');
-        
-        // 搜索预览功能
-        searchInputs.forEach((input) => {
-            const inputElement = input as HTMLInputElement;
-            const searchContainer = inputElement.closest('.search-container');
-            const previewContainer = searchContainer?.querySelector('.search-preview');
-            
-            if (inputElement && previewContainer) {
-                inputElement.addEventListener('input', () => {
-                    const query = inputElement.value.trim();
-                    
-                    if (query.length >= 2) {
-                        // 显示搜索预览
-                        previewContainer.classList.remove('hidden');
-                        previewContainer.classList.add('visible', 'opacity-100', 'scale-100');
-                        
-                        // 这里可以添加实际的搜索预览逻辑，例如API调用
-                        // 简单模拟一些搜索结果
-                        previewContainer.innerHTML = `
-                            <div class="p-2 hover:bg-base-200 rounded-lg">
-                                <a href="/blog/post-1" class="block">
-                                    <div class="font-medium">Blog post with "${query}" 1</div>
-                                    <div class="text-xs text-base-content/70">This is a technical article...</div>
-                                </a>
-                            </div>
-                            <div class="p-2 hover:bg-base-200 rounded-lg">
-                                <a href="/blog/post-2" class="block">
-                                    <div class="font-medium">Another post with "${query}"</div>
-                                    <div class="text-xs text-base-content/70">Exploring the latest industry trends...</div>
-                                </a>
-                            </div>
-                            <div class="text-center py-2 border-t">
-                                <a href="/search?q=${encodeURIComponent(query)}" class="text-primary text-sm">
-                                    View all results
-                                </a>
-                            </div>
-                        `;
-                    } else if (previewContainer) {
-                        previewContainer.classList.add('hidden');
-                        previewContainer.classList.remove('visible', 'opacity-100', 'scale-100');
-                    }
-                });
-                
-                // 点击其他地方关闭预览
-                document.addEventListener('click', (e) => {
-                    if (!inputElement.contains(e.target as Node) && 
-                        !previewContainer.contains(e.target as Node)) {
-                        previewContainer.classList.add('hidden');
-                        previewContainer.classList.remove('visible', 'opacity-100', 'scale-100');
-                    }
-                });
-            }
-        });
-
-        // 搜索按钮点击事件
-        searchButtons.forEach((button, index) => {
-            const htmlButton = button as HTMLElement;
-            htmlButton.addEventListener('click', () => {
-                const input = searchInputs[index] as HTMLInputElement;
-                const query = input.value.trim();
-                if (query) {
-                    console.log('搜索:', query);
-                    // 实际搜索跳转
-                    window.location.href = `/search?q=${encodeURIComponent(query)}`;
-                }
-            });
-            
-            // 允许在输入框中按回车进行搜索
-            const input = searchInputs[index] as HTMLInputElement;
-            input?.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    htmlButton.click();
-                }
-            });
-        });
+		} catch (error) {
+			console.error('[Header] 添加动画样式时出错:', error);
+		}
 	});
 </script>
 
 <header class={cn(
-	'relative z-40 w-full sticky top-0',
-	'bg-base-100/80 backdrop-blur-md',
-	'border-b border-base-300',
+	'sticky z-40 w-full top-0',
+	'bg-base-100/90 backdrop-blur-md',
+	'border-b border-base-300 shadow-sm',
 )}>
-	<div class="mx-auto max-w-[1760px] px-5 py-4">
-		<div class="flex items-center justify-between">
-			<div class="flex items-center space-x-8">
-				{/* 左侧 Logo */}
-				<a href="/" class="text-xl font-bold text-base-content">{logoText}</a>
-
-				{/* 左侧导航 (仅桌面可见) */}
-				<nav class="hidden md:block">
-					<ul class="flex gap-x-6">
-						{menuItems.filter((item) => !item.items).map((item) => (
-							<li class="relative h-10 flex items-center">
-								<a href={item.to} class="flex h-10 items-center whitespace-pre text-base text-base-content hover:text-primary transition-colors duration-200">
-									{item.text}
-								</a>
-							</li>
-						))}
-					</ul>
-				</nav>
+	<div class="container mx-auto px-4 py-2">
+		<div class="navbar min-h-0 h-auto py-2">
+			{/* Logo 区域 */}
+			<div class="navbar-start">
+				<a href={getPath('')} class="btn btn-ghost px-2 md:px-4 normal-case text-xl font-bold text-base-content hover:bg-base-200/50">
+					{logoText}
+				</a>
 			</div>
 
-			{/* 中间搜索框 (仅桌面可见) */}
-			<div class="hidden md:block flex-1 max-w-xl mx-auto">
-				<div class="search-container relative">
-					<div class="input-group relative flex items-center">
-						<input type="text" placeholder="Search blog..." class="input input-bordered w-full focus:outline-primary transition-all duration-300 ease-in-out focus:ring-2 focus:ring-primary/20" />
-						<button class="btn btn-primary join-item absolute right-0 top-0 h-full">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-						</button>
-					</div>
-					
-					{/* 搜索预览容器 */}
-					<div class="search-preview hidden absolute top-full left-0 right-0 mt-1 bg-base-100 border border-base-300 rounded-lg shadow-lg z-50 max-h-[300px] overflow-y-auto transition-all duration-300 ease-in-out transform origin-top opacity-0 scale-95">
-						{/* JavaScript 会动态填充搜索结果 */}
-					</div>
-				</div>
+			{/* 中间导航区域 - 桌面端 */}
+			<div class="navbar-center hidden md:flex">
+				<ul class="menu menu-horizontal px-1 gap-1">
+					{processedMenuItems.filter((item) => !item.items).map((item) => (
+						<li>
+							<a href={item.to} class="rounded-lg text-base hover:bg-base-200/70 hover:text-primary transition-all duration-200">
+								{item.text}
+							</a>
+						</li>
+					))}
+
+					{/* 下拉菜单项 */}
+					{processedMenuItems.filter((item) => item.items && item.items.length > 0).map((item) => (
+						<li>
+							<details class="dropdown">
+								<summary class="rounded-lg text-base hover:bg-base-200/70 hover:text-primary transition-all duration-200 flex gap-1 items-center">
+									{item.text}
+									<ChevronDown className="w-4 h-4 opacity-70 transition-transform duration-300" />
+								</summary>
+								<ul class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-72 mt-4">
+									{item.items?.map((subItem) => (
+										<li>
+											<a href={subItem.to} class="hover:bg-base-200/70 hover:text-primary transition-all duration-200">
+												<div>
+													<div class="font-medium">{subItem.text}</div>
+													{subItem.description && (
+														<div class="text-xs opacity-70">{subItem.description}</div>
+													)}
+												</div>
+											</a>
+										</li>
+									))}
+								</ul>
+							</details>
+						</li>
+					))}
+				</ul>
 			</div>
 
 			{/* 右侧功能区 */}
-			<div class="flex items-center gap-x-2 md:gap-x-4">
-				{/* 导航下拉菜单 (仅显示有子菜单的项目) */}
-				<nav class="hidden lg:block">
-					<ul class="flex gap-x-4">
-						{menuItems.filter((item) => item.items && item.items.length > 0).map((item) => (
-							<li class="relative group h-10 flex items-center">
-								<button class="btn btn-ghost h-10 px-4 flex items-center gap-1 min-h-0 text-base capitalize font-normal">
-									{item.text}
-									<ChevronDown className="w-4 h-4 opacity-60 transition-transform duration-300 group-hover:rotate-180" />
-								</button>
-								<div class={clsx(
-									'absolute -left-5 top-full w-[300px] pt-5',
-									'pointer-events-none opacity-0 invisible',
-									'origin-top-left transition-all duration-300 ease-out transform scale-95',
-									'group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100 group-hover:scale-100'
-								)}>
-									<ul class={clsx(
-										'relative flex min-w-[248px] flex-col gap-y-0.5 rounded-[14px] border p-2.5',
-										'border-base-300 bg-base-100 shadow-lg'
-									)}>
-										{item.items?.map((subItem) => (
-											<li>
-												<a href={subItem.to} class={clsx(
-													'group/link relative flex items-center overflow-hidden whitespace-nowrap rounded-[14px] p-2',
-													'before:absolute before:inset-0 before:z-10 before:opacity-0 before:transition-opacity before:duration-200 hover:before:opacity-100',
-													'text-base-content before:bg-base-200 hover:text-primary transition-colors duration-200'
-												)}>
-													<div class="relative z-10 ml-3">
-														<span class="block text-sm font-medium">{subItem.text}</span>
-														{subItem.description && (
-															<span class="mt-0.5 block text-sm text-base-content/70">
-																{subItem.description}
-															</span>
-														)}
-													</div>
-												</a>
-											</li>
-										))}
-									</ul>
-								</div>
-							</li>
-						))}
-					</ul>
-				</nav>
-
+			<div class="navbar-end">
 				{/* 主题切换 */}
 				<div class="dropdown dropdown-end">
 					<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
-						<div class="indicator">
-							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette"><circle cx="13.5" cy="6.5" r="2.5"/><path d="M19 2.5H5a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-14a3 3 0 0 0-3-3Z"/><path d="M13.5 16.5h2a2 2 0 0 0 2-2v-2"/><path d="M2 12.5h5.5"/><path d="M8 16.5h3"/><path d="M2 8.5h3"/></svg>
-						</div>
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette"><circle cx="13.5" cy="6.5" r="2.5"/><path d="M19 2.5H5a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-14a3 3 0 0 0-3-3Z"/><path d="M13.5 16.5h2a2 2 0 0 0 2-2v-2"/><path d="M2 12.5h5.5"/><path d="M8 16.5h3"/><path d="M2 8.5h3"/></svg>
 					</div>
-					<div tabindex="0" class="mt-3 z-50 card dropdown-content shadow bg-base-100 rounded-box w-60 max-h-96 overflow-y-auto">
+					<div tabindex="0" class="dropdown-content z-[1] card shadow-lg bg-base-100 rounded-box w-64 mt-4">
 						<div class="card-body p-4">
-							<h3 class="font-bold text-lg mb-2">选择主题</h3>
-							<div class="join join-vertical w-full">
-                                {themes.map(theme => (
-                                    <input
-                                        type="radio"
-                                        name="theme-buttons"
-                                        class="btn theme-controller join-item"
-                                        aria-label={theme.label}
-                                        value={theme.value}
-                                    />
-                                ))}
+							<h3 class="card-title text-lg mb-2">选择主题</h3>
+							<div class="grid grid-cols-2 gap-2">
+								{themes.map(theme => (
+									<label class="flex cursor-pointer gap-2 items-center p-2 rounded-box hover:bg-base-200 transition-all duration-200">
+										<span class="text-xl">{theme.icon}</span>
+										<span class="flex-1">{theme.label}</span>
+										<input
+											type="radio"
+											name="theme-buttons"
+											class="theme-controller radio radio-sm radio-primary"
+											value={theme.value}
+										/>
+									</label>
+								))}
 							</div>
 						</div>
 					</div>
 				</div>
 
-				{/* 登录按钮 (桌面端) */}
-				<Button client:load variant="primary" id="login-button" className="bg-primary hover:bg-primary-focus text-primary-content hidden md:flex">
-					<User className="mr-2 h-4 w-4" />
-					登录
-				</Button>
-
 				{/* 移动菜单按钮 */}
-				<button id="mobile-menu-button" class="btn btn-ghost btn-circle lg:hidden">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 menu-icon"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
-				</button>
+				<div class="dropdown dropdown-end md:hidden">
+					<div tabindex="0" role="button" id="mobile-menu-button" class="btn btn-ghost btn-circle">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 menu-icon"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
+					</div>
+					<div tabindex="0" id="mobile-menu" class="dropdown-content z-[1] menu menu-sm p-2 shadow-lg bg-base-100 rounded-box w-72 mt-4">
+						{processedMenuItems.map((item) => (
+							<li>
+								{item.to ? (
+									<a href={item.to} class="hover:bg-base-200/70 hover:text-primary transition-all duration-200">
+										{item.text}
+									</a>
+								) : (
+									<details class="dropdown-button w-full">
+										<summary class="hover:bg-base-200/70 hover:text-primary transition-all duration-200">
+											{item.text}
+										</summary>
+										<ul class="dropdown-menu p-2">
+											{item.items?.map((subItem) => (
+												<li>
+													<a href={subItem.to} class="hover:bg-base-200/70 hover:text-primary transition-all duration-200">
+														<div>
+															<div class="font-medium">{subItem.text}</div>
+															{subItem.description && (
+																<div class="text-xs opacity-70">{subItem.description}</div>
+															)}
+														</div>
+													</a>
+												</li>
+											))}
+										</ul>
+									</details>
+								)}
+							</li>
+						))}
+					</div>
+				</div>
 			</div>
 		</div>
-	</div>
-
-	{/* 移动菜单（默认隐藏） */}
-	<div id="mobile-menu" class="hidden lg:hidden absolute top-full left-0 w-full bg-base-100 border-t border-base-300 shadow-lg">
-		<ul class="menu p-4 w-full">
-            {/* 移动端搜索框 */}
-            <li class="mb-4">
-                <div class="search-container relative">
-                    <div class="input-group relative flex items-center">
-                        <input type="text" placeholder="搜索博客..." class="input input-bordered w-full transition-all duration-300 ease-in-out focus:ring-2 focus:ring-primary/20" />
-                        <button class="btn btn-square absolute right-0 top-0 h-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                        </button>
-                    </div>
-                    
-                    {/* 移动端搜索预览 */}
-                    <div class="search-preview hidden absolute top-full left-0 right-0 mt-1 bg-base-100 border border-base-300 rounded-lg shadow-lg z-50 max-h-[300px] overflow-y-auto transition-all duration-300 ease-in-out transform origin-top opacity-0 scale-95">
-                        {/* JavaScript 会动态填充搜索结果 */}
-                    </div>
-                </div>
-            </li>
-			{menuItems.map((item) => (
-				<li>
-					{item.to ? (
-						<a href={item.to} class="text-base-content py-3">{item.text}</a>
-					) : (
-						<div class="w-full">
-							<button class="dropdown-button w-full flex justify-between items-center text-base-content py-3">
-								{item.text}
-								<ChevronDown className="w-4 h-4 transition-transform duration-200" />
-							</button>
-							<ul class="dropdown-menu hidden pl-4 py-2 space-y-2">
-								{item.items?.map((subItem) => (
-									<li>
-										<a href={subItem.to} class="block py-2 text-base-content/80 hover:text-primary">
-											{subItem.text}
-										</a>
-									</li>
-								))}
-							</ul>
-						</div>
-					)}
-				</li>
-			))}
-			{/* 移动端登录按钮 */}
-			<li class="mt-4">
-				<Button client:load variant="primary" id="login-button-mobile" className="bg-primary hover:bg-primary-focus text-primary-content w-full justify-center">
-					<User className="mr-2 h-4 w-4" />
-					登录
-				</Button>
-			</li>
-		</ul>
 	</div>
 </header>
 
 {/* 登录模态框 */}
-<div id="login-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-	<div class="bg-base-100 rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
-		<div class="flex justify-between items-center mb-4">
-			<h3 class="text-xl font-bold text-base-content">用户登录</h3>
-			<button id="close-modal" class="text-base-content/70 hover:text-base-content">
-				<XIcon className="h-6 w-6" />
+<dialog id="login-modal" class="modal">
+	<div class="modal-box">
+		<form method="dialog">
+			<button id="close-modal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+				<XIcon className="h-5 w-5" />
 			</button>
-		</div>
+		</form>
+		<h3 class="font-bold text-lg mb-4">用户登录</h3>
 		<form id="login-form" class="space-y-4">
-			<div>
-				<label for="email" class="block text-sm font-medium text-base-content mb-1">邮箱</label>
-				<input type="email" id="email" name="email" required class="w-full px-3 py-2 border border-base-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" />
+			<div class="form-control w-full">
+				<label class="label">
+					<span class="label-text">邮箱</span>
+				</label>
+				<input type="email" id="email" name="email" required class="input input-bordered w-full" autocomplete="username" />
 			</div>
-			<div>
-				<label for="password" class="block text-sm font-medium text-base-content mb-1">密码</label>
-				<input type="password" id="password" name="password" required class="w-full px-3 py-2 border border-base-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" autocomplete="current-password"/>
+			<div class="form-control w-full">
+				<label class="label">
+					<span class="label-text">密码</span>
+				</label>
+				<input type="password" id="password" name="password" required class="input input-bordered w-full" autocomplete="current-password"/>
 			</div>
 			<div class="flex items-center justify-between">
-				<div class="flex items-center">
-					<input id="remember" name="remember" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-base-300 rounded" />
-					<label for="remember" class="ml-2 block text-sm text-base-content">记住我</label>
+				<div class="form-control">
+					<label class="label cursor-pointer">
+						<input id="remember" name="remember" type="checkbox" class="checkbox checkbox-sm checkbox-primary" />
+						<span class="label-text ml-2">记住我</span>
+					</label>
 				</div>
-				<a href="#" class="text-sm text-primary hover:text-primary-focus">忘记密码？</a>
+				<a href="#" class="link link-primary link-hover text-sm">忘记密码？</a>
 			</div>
-			<div>
-				<button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-content bg-primary hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-					登录
-				</button>
+			<div class="form-control mt-6">
+				<button type="submit" class="btn btn-primary w-full">登录</button>
 			</div>
-			<div class="text-center">
-				<p class="text-sm text-base-content">
-					还没有账号？ <a href="#" class="text-primary hover:text-primary-focus">立即注册</a>
+			<div class="text-center mt-4">
+				<p class="text-sm">
+					还没有账号？ <a href="#" class="link link-primary link-hover">立即注册</a>
 				</p>
 			</div>
 		</form>
 	</div>
-</div>
+	<form method="dialog" class="modal-backdrop">
+		<button>关闭</button>
+	</form>
+</dialog>
+
+{/* 搜索模态框 */}
+<SearchModal />

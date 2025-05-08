@@ -2,48 +2,159 @@
 import '../styles/global.css'
 import Header from '../components/Header.astro'
 import Analytics from '../components/Analytics.astro'
-import Footer from '../components/Footer.astro'; // Assuming Footer content is moved or refactored
+import Footer from '../components/Footer.astro'
+import SEO from '../components/SEO.astro'
+import PagefindHighlight from '../components/PagefindHighlight.astro'
+import { getPath } from '../lib/path'
 
 interface Props {
     title: string
     description?: string
     image?: string
+    type?: 'website' | 'article' | 'profile'
+    publishDate?: Date | string
+    updateDate?: Date | string
+    author?: string
+    tags?: string[]
+    canonicalURL?: URL | string
 }
 
 const {
     title,
     description = '一个使用Astro构建的现代博客',
     image = '/placeholder-social.jpg',
+    type = 'website',
+    publishDate,
+    updateDate,
+    author,
+    tags,
+    canonicalURL = Astro.url,
 } = Astro.props
-const pageLoadTime = new Date(); // Record load time on server (for potential SSR info)
 ---
 
 <!doctype html>
 <html lang="zh-CN">
     <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="generator" content={Astro.generator} />
 
-        <title>{title}</title>
-        <meta name="description" content={description} />
+        <script is:inline>
+            (function() {
+                // 页面加载前立即应用主题，防止闪烁
+                try {
+                    // IndexedDB配置
+                    const DB_NAME = 'xpxBlogThemeDB';
+                    const DB_VERSION = 1;
+                    const THEME_STORE = 'themes';
+                    const THEME_KEY = 'currentTheme';
+                    const DEFAULT_THEME = 'winter';
 
-        <!-- Open Graph / Facebook -->
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={Astro.url} />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={description} />
-        <meta property="og:image" content={new URL(image, Astro.url)} />
+                    // 首先尝试从localStorage获取主题（快速路径）
+                    const savedTheme = localStorage.getItem('theme');
+                    const initialTheme = savedTheme || DEFAULT_THEME;
 
-        <!-- Twitter -->
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content={Astro.url} />
-        <meta property="twitter:title" content={title} />
-        <meta property="twitter:description" content={description} />
-        <meta property="twitter:image" content={new URL(image, Astro.url)} />
+                    // 快速应用主题，避免不必要的DOM操作
+                    document.documentElement.setAttribute('data-theme', initialTheme);
+                    if (['dracula', 'synthwave', 'dark', 'night', 'coffee'].includes(initialTheme)) {
+                        document.documentElement.classList.add('dark');
+                    }
+
+                    // 然后尝试从IndexedDB获取主题（可能更新）
+                    const tryGetThemeFromIndexedDB = function() {
+                        try {
+                            const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                            request.onerror = function() {
+                                console.log('IndexedDB打开失败，使用localStorage主题');
+                            };
+
+                            request.onsuccess = function(event) {
+                                try {
+                                    const db = event.target.result;
+                                    const transaction = db.transaction([THEME_STORE], 'readonly');
+                                    const store = transaction.objectStore(THEME_STORE);
+                                    const getRequest = store.get(THEME_KEY);
+
+                                    getRequest.onsuccess = function(event) {
+                                        const result = event.target.result;
+                                        if (result && result.value) {
+                                            const dbTheme = result.value;
+                                            // 如果IndexedDB中的主题与初始应用的不同，则更新
+                                            if (dbTheme !== initialTheme) {
+                                                document.documentElement.setAttribute('data-theme', dbTheme);
+                                                document.documentElement.classList.toggle('dark',
+                                                    ['dracula', 'synthwave', 'dark', 'night', 'coffee'].includes(dbTheme));
+                                            }
+                                        }
+                                    };
+
+                                    transaction.oncomplete = function() {
+                                        db.close();
+                                    };
+                                } catch (error) {
+                                    console.error('IndexedDB事务错误:', error);
+                                }
+                            };
+
+                            request.onupgradeneeded = function(event) {
+                                const db = event.target.result;
+                                if (!db.objectStoreNames.contains(THEME_STORE)) {
+                                    db.createObjectStore(THEME_STORE, { keyPath: 'id' });
+                                }
+                            };
+                        } catch (error) {
+                            console.error('IndexedDB操作失败:', error);
+                        }
+                    };
+
+                    // 在页面加载后尝试从IndexedDB获取主题
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', tryGetThemeFromIndexedDB);
+                    } else {
+                        tryGetThemeFromIndexedDB();
+                    }
+
+                    // 监听主题变化事件
+                    document.addEventListener('theme-changed', function(e) {
+                        const newTheme = e.detail.theme;
+
+                        // 应用主题
+                        document.documentElement.setAttribute('data-theme', newTheme);
+                        document.documentElement.classList.toggle('dark',
+                            ['dracula', 'synthwave', 'dark', 'night', 'coffee'].includes(newTheme));
+                    });
+                } catch (e) {
+                    console.error('Theme preload error:', e);
+                }
+            })();
+        </script>
+
+        <!-- SEO 组件处理所有元标签和结构化数据 -->
+        <SEO
+            title={title}
+            description={description}
+            image={image}
+            type={type}
+            publishDate={publishDate}
+            updateDate={updateDate}
+            author={author}
+            tags={tags}
+            canonicalURL={canonicalURL}
+        />
 
         <!-- 网站图标 -->
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/svg+xml" href={getPath("favicon.svg")} />
+
+
+
+        <!-- DNS 预解析 -->
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+
+        <!-- 预连接 -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+
 
         <!-- 允许在head中添加额外内容的插槽 -->
         <slot name="head" />
@@ -51,13 +162,30 @@ const pageLoadTime = new Date(); // Record load time on server (for potential SS
         <!-- 分析追踪 -->
         <Analytics />
 
+        <!-- 基础路径脚本 -->
+        <script is:inline src={getPath("scripts/base-path.js")}></script>
+
+        <!-- 全局基础路径变量 -->
+        <script is:inline define:vars={{ basePath: import.meta.env.PUBLIC_USE_BASE_PATH ? `/${import.meta.env.PUBLIC_BASE_PATH}` : '' }}>
+            // 将基础路径暴露给客户端脚本
+            window.xpxBlogBasePath = basePath;
+        </script>
+
+        <!-- 主题切换器脚本 -->
+        <script is:inline src={getPath("scripts/theme-switcher-simple.js")}></script>
+
         <style>
+            body {
+                overflow-x: hidden;
+                max-width: 100vw;
+            }
             main {
-                max-width: 1200px;
+                width: 100%;
                 margin: 0 auto;
                 padding: 0 1rem;
+                max-width: 100%;
             }
-            
+
             #page-loader {
                 position: fixed;
                 inset: 0;
@@ -93,14 +221,17 @@ const pageLoadTime = new Date(); // Record load time on server (for potential SS
 
         <Header />
 
-        <main class="container mx-auto px-4 py-8">
+        <main class="container mx-auto px-4 py-8 w-full max-w-full sm:max-w-screen-sm md:max-w-screen-md lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl">
             <slot />
         </main>
 
+        <!-- 添加Pagefind高亮功能 -->
+        <PagefindHighlight />
+
         <footer class="bg-base-200 py-10 mt-16">
-            <div class="container mx-auto px-4">
+            <div class="container mx-auto px-4 max-w-full sm:max-w-screen-sm md:max-w-screen-md lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-screen-2xl">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="flex flex-col space-y-4">
+                    <div class="flex flex-col space-y-4 items-start">
                         <h3 class="text-lg font-bold">关于我们</h3>
                         <p class="text-base-content/70">
                             这是一个使用Astro和DaisyUI构建的现代博客网站。分享最新的技术、设计和数字营销内容。
@@ -111,22 +242,22 @@ const pageLoadTime = new Date(); // Record load time on server (for potential SS
                         <h3 class="text-lg font-bold">导航</h3>
                         <nav class="flex flex-row space-x-4">
                             <a
-                                href="/"
+                                href={getPath('')}
                                 class="hover:text-primary transition-colors"
                                 >首页</a
                             >
                             <a
-                                href="/blog"
+                                href={getPath('blog')}
                                 class="hover:text-primary transition-colors"
                                 >博客</a
                             >
                             <a
-                                href="/about"
+                                href={getPath('about')}
                                 class="hover:text-primary transition-colors"
                                 >关于</a
                             >
                             <a
-                                href="/contact"
+                                href={getPath('contact')}
                                 class="hover:text-primary transition-colors"
                                 >联系</a
                             >
@@ -138,27 +269,6 @@ const pageLoadTime = new Date(); // Record load time on server (for potential SS
                         <div class="flex items-center space-x-4">
                             <a
                                 href="https://twitter.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="text-base-content hover:text-primary"
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    ><path
-                                        d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"
-                                    ></path></svg
-                                >
-                            </a>
-                            <a
-                                href="https://github.com"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 class="text-base-content hover:text-primary"
@@ -309,40 +419,8 @@ const pageLoadTime = new Date(); // Record load time on server (for potential SS
                 console.log('清理运行时统计计时器');
                 clearInterval(runtimeInterval);
             });
+
         </script>
+
     </body>
 </html>
-<style is:global>
-    /* Define CSS variables for Tailwind if needed */
-    :root {
-        --foreground: 0 0% 3.9%;
-        --background: 0 0% 100%;
-        --muted: 210 40% 96.1%;
-        --muted-foreground: 215.4 16.3% 46.9%;
-        --primary: 222.2 47.4% 11.2%;
-        --primary-foreground: 210 40% 98%;
-        --secondary: 210 40% 96.1%;
-        --secondary-foreground: 222.2 47.4% 11.2%;
-        --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 210 40% 98%;
-        --border: 214.3 31.8% 91.4%;
-        --ring: 222.2 84% 4.9%;
-    }
-    .dark {
-        --foreground: 210 4% 96%;
-        --background: 222.2 84% 4.9%;
-        --muted: 217.2 32.6% 17.5%;
-        --muted-foreground: 215 20.2% 65.1%;
-        --primary: 210 40% 98%;
-        --primary-foreground: 222.2 47.4% 11.2%;
-        --secondary: 217.2 32.6% 17.5%;
-        --secondary-foreground: 210 40% 98%;
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 210 40% 98%;
-        --border: 217.2 32.6% 17.5%;
-        --ring: 212.7 26.8% 83.9%;
-    }
-
-    /* Add other global styles if necessary */
-</style>
-

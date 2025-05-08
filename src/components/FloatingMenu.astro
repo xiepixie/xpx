@@ -1,7 +1,4 @@
 ---
-// 引入需要的图标
-import { Sun, Moon, BookOpen, Calendar, BarChart3, ChevronUp, MessageSquare,Star,X } from './react/Icons';
-import React from 'react';
 export interface Props {
     showScrollTop?: boolean;
     showThemeSwitcher?: boolean;
@@ -9,24 +6,16 @@ export interface Props {
     modules?: {
         id: string;
         title: string;
-        icon: keyof typeof moduleIcons;
+        icon: string; // 'BookOpen' | 'Calendar' | 'BarChart3' | 'MessageSquare'
     }[];
     availableThemes?: {
         value: string;
         label: string;
-        icon: keyof typeof moduleIcons;
+        icon: string; // 'Sun' | 'Moon'
     }[];
 }
 
-// 定义模块图标映射
-const moduleIcons = {
-    BookOpen,
-    Calendar,
-    BarChart3,
-    MessageSquare,
-    Sun,
-    Moon
-};
+// 不再需要模块图标映射，直接使用内联SVG
 
 const {
     showScrollTop = true,
@@ -38,8 +27,8 @@ const {
         { id: 'event-calendar', title: 'Calendar', icon: 'Calendar' },
     ],
     availableThemes = [
-        { value: 'valentine', label: '浪漫粉', icon: 'Sun' }, 
-        { value: 'dracula', label: '暗黑', icon: 'Moon' }, 
+        { value: 'valentine', label: '浪漫粉', icon: 'Sun' },
+        { value: 'dracula', label: '暗黑', icon: 'Moon' },
         { value: 'winter', label: '冬日', icon: 'Sun' },
         { value: 'synthwave', label: '赛博朋克', icon: 'Moon' },
     ]
@@ -52,32 +41,63 @@ const {
         <input type="checkbox" id="menu-toggle-checkbox" class="peer sr-only" /> {/* sr-only for accessibility */}
 
         <!-- 菜单触发按钮 - 添加旋转动画和阴影反馈 -->
-        <label for="menu-toggle-checkbox" class="btn btn-primary btn-circle shadow-lg transition-transform duration-300 ease-in-out menu-toggle-btn peer-checked:rotate-90 peer-checked:shadow-xl peer-checked:bg-primary-focus" aria-label="Toggle Floating Menu">
-            <span class="open-icon"><Star className="h-5 w-5" /></span> {/* Use Move icon for closed state */}
-            <span class="close-icon hidden"><X className="h-5 w-5" /></span> {/* Use X icon for open state */}
+        <label for="menu-toggle-checkbox" class="btn btn-primary btn-circle shadow-lg transition-all duration-300 ease-in-out menu-toggle-btn peer-checked:rotate-90 peer-checked:shadow-xl peer-checked:bg-primary-focus hover:scale-110 hover:shadow-xl" aria-label="Toggle Floating Menu">
+            <span class="open-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+            </span>
+            <span class="close-icon hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </span>
+            <span class="sr-only">切换浮动菜单</span>
         </label>
 
         <!-- 菜单内容 - 优化布局和响应式 -->
-        <div class="collapse-content p-2 bg-base-200 rounded-box shadow-md w-auto min-w-[48px]"> {/* min-width to prevent collapse */}
-            <div class="menu-items-container flex flex-col gap-2 md:flex-col"> {/* Default vertical, md:flex-col keeps it vertical */}
+        <div class="collapse-content p-3 bg-base-200 rounded-box shadow-lg w-auto min-w-[48px] backdrop-blur-sm bg-opacity-90"> {/* min-width to prevent collapse */}
+            <div class="menu-items-container flex flex-col gap-3 md:flex-col"> {/* Default vertical, md:flex-col keeps it vertical */}
                 {/* 返回顶部按钮 */}
                 {showScrollTop && (
-                    <button id="scroll-top-btn" class="btn btn-circle btn-sm bg-base-100 border-base-300 shadow hover:shadow-md transition-shadow tooltip tooltip-left" data-tip="返回顶部" aria-label="Scroll to Top">
-                        <ChevronUp className="h-5 w-5" />
+                    <button id="scroll-top-btn" class="btn btn-circle btn-sm bg-base-100 border-base-300 shadow-md hover:shadow-lg hover:scale-110 transition-all duration-300 tooltip tooltip-left" data-tip="返回顶部" aria-label="Scroll to Top">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
                     </button>
                 )}
 
                 {/* 主题切换优化 - 使用 data-theme 和 localStorage */}
                 {showThemeSwitcher && (
-                    <div class="theme-switcher-group btn-group btn-group-vertical md:btn-group-vertical"> {/* Default vertical */}
+                    <div class="theme-switcher-group btn-group btn-group-vertical md:btn-group-vertical space-y-2"> {/* Default vertical */}
                         {availableThemes.map((theme) => (
                             <button
-                                class="theme-btn btn btn-xs bg-base-100 border-base-300 shadow hover:shadow-md transition-shadow tooltip tooltip-left"
+                                class="theme-btn btn btn-xs bg-base-100 border-base-300 shadow-md hover:shadow-lg hover:scale-110 transition-all duration-300 tooltip tooltip-left"
                                 data-tip={theme.label}
                                 data-theme-value={theme.value}
                                 aria-label={`Switch to ${theme.label} theme`}
                             >
-                                {React.createElement(moduleIcons[theme.icon as keyof typeof moduleIcons], { className: "h-4 w-4" })}
+                                <span class="icon-container">
+                                    {theme.icon === 'Sun' && (
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                                            <circle cx="12" cy="12" r="5"></circle>
+                                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                                        </svg>
+                                    )}
+                                    {theme.icon === 'Moon' && (
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                        </svg>
+                                    )}
+                                </span>
                             </button>
                         ))}
                     </div>
@@ -85,15 +105,37 @@ const {
 
                 {/* 模块导航优化 - 按钮尺寸调整 */}
                 {showModuleNav && modules.length > 0 && (
-                    <div class="module-nav-group btn-group btn-group-vertical md:btn-group-vertical"> {/* Default vertical */}
+                    <div class="module-nav-group btn-group btn-group-vertical md:btn-group-vertical space-y-2"> {/* Default vertical */}
                         {modules.map((module) => (
                             <button
-                                class="module-link-btn btn btn-xs bg-base-100 border-base-300 shadow hover:shadow-md transition-shadow tooltip tooltip-left"
+                                class="module-link-btn btn btn-xs bg-base-100 border-base-300 shadow-md hover:shadow-lg hover:scale-110 transition-all duration-300 tooltip tooltip-left"
                                 data-tip={module.title}
                                 data-target={module.id}
                                 aria-label={`Navigate to ${module.title}`}
                             >
-                                {React.createElement(moduleIcons[module.icon], { className: "h-4 w-4" })}
+                                <span class="icon-container">
+                                    {module.icon === 'BookOpen' && (
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                                        </svg>
+                                    )}
+                                    {module.icon === 'Calendar' && (
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                    )}
+                                    {module.icon === 'BarChart3' && (
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                                            <line x1="12" y1="20" x2="12" y2="10"></line>
+                                            <line x1="18" y1="20" x2="18" y2="4"></line>
+                                            <line x1="6" y1="20" x2="6" y2="16"></line>
+                                        </svg>
+                                    )}
+                                </span>
                             </button>
                         ))}
                     </div>
@@ -103,10 +145,11 @@ const {
     </div>
 </div>
 
-<script define:vars={{ initialThemes: availableThemes.map(t => t.value) }}>
+<script is:inline define:vars={{ initialThemes: availableThemes.map(t => t.value) }}>
     document.addEventListener('astro:page-load', () => {
         const container = document.getElementById('draggable-container');
-        const collapse = document.getElementById('floating-menu-collapse');
+        // 获取菜单元素
+        const collapseEl = document.getElementById('floating-menu-collapse');
         const checkbox = document.getElementById('menu-toggle-checkbox');
         const toggleBtn = document.querySelector('.menu-toggle-btn');
         const openIcon = toggleBtn?.querySelector('.open-icon');
@@ -114,46 +157,254 @@ const {
         const scrollTopBtn = document.getElementById('scroll-top-btn');
         const themeBtns = document.querySelectorAll('.theme-btn');
         const moduleLinkBtns = document.querySelectorAll('.module-link-btn');
-        const menuItemsContainer = document.querySelector('.menu-items-container');
 
         let isDragging = false;
-        let startX, startY, initialX, initialY;
+        let startX = 0, startY = 0, initialX = 0, initialY = 0;
         let currentX = 0, currentY = 0; // Store current position
+        let isCollapsed = false; // 跟踪菜单是否已收缩
 
-        // --- 改进的主题处理逻辑 ---
-        // 与Header组件保持一致的主题存储方式
-        const getStoredTheme = () => {
+        // 修复移动端显示 [object Object] 问题
+        if (container) {
+            // 确保容器内容正确显示
+            const containerContent = container.textContent;
+            if (containerContent && containerContent.includes('[object Object]')) {
+                console.error('检测到 [object Object] 显示问题，尝试修复...');
+                // 清除错误内容并重新应用样式
+                container.innerHTML = container.innerHTML.replace(/\[object Object\]/g, '');
+            }
+        }
+
+        // 收缩菜单函数
+        const collapseMenu = () => {
+            if (isCollapsed || !container) return;
+
+            // 获取当前位置
+            const rect = container.getBoundingClientRect();
+
+            // 根据靠近的边缘决定收缩方向
+            if (rect.left < 50) {
+                // 靠近左边缘，向左收缩一半
+                container.style.transform = `translate(${currentX - rect.width / 3}px, ${currentY}px)`;
+            } else if (rect.right > window.innerWidth - 50) {
+                // 靠近右边缘，向右收缩一半
+                container.style.transform = `translate(${currentX + rect.width / 3}px, ${currentY}px)`;
+            }
+
+            isCollapsed = true;
+
+            // 添加收缩状态的样式
+            container.classList.add('menu-collapsed');
+        };
+
+        // 展开菜单函数
+        const expandMenu = () => {
+            if (!isCollapsed || !container) return;
+
+            // 恢复原始位置
+            container.style.transform = `translate(${currentX}px, ${currentY}px)`;
+            isCollapsed = false;
+
+            // 移除收缩状态的样式
+            container.classList.remove('menu-collapsed');
+        };
+
+        // 鼠标悬停时展开
+        container?.addEventListener('mouseenter', expandMenu);
+
+        // 鼠标离开时，如果靠近边缘则收缩
+        container?.addEventListener('mouseleave', () => {
+            if (!container) return;
+
+            const rect = container.getBoundingClientRect();
+            if (rect.left < 50 || rect.right > window.innerWidth - 50 ||
+                rect.top < 50 || rect.bottom > window.innerHeight - 50) {
+                collapseMenu();
+            }
+        });
+
+        // --- 改进的主题处理逻辑 - 使用IndexedDB ---
+        // IndexedDB配置
+        const DB_NAME = 'xpxBlogThemeDB';
+        const DB_VERSION = 1;
+        const THEME_STORE = 'themes';
+        const THEME_KEY = 'currentTheme';
+        const DEFAULT_THEME = initialThemes[0];
+
+        // 从IndexedDB获取主题
+        const getThemeFromIndexedDB = () => {
+            return new Promise((resolve) => {
+                try {
+                    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                    request.onerror = () => {
+                        console.error('[FloatingMenu] 打开IndexedDB失败，尝试备用方法');
+                        resolve(getFallbackTheme());
+                    };
+
+                    request.onsuccess = (event) => {
+                        try {
+                            const db = event.target.result;
+                            const transaction = db.transaction([THEME_STORE], 'readonly');
+                            const store = transaction.objectStore(THEME_STORE);
+                            const getRequest = store.get(THEME_KEY);
+
+                            getRequest.onsuccess = (event) => {
+                                const result = event.target.result;
+                                if (result?.value) {
+                                    resolve(result.value);
+                                } else {
+                                    resolve(getFallbackTheme());
+                                }
+                            };
+
+                            getRequest.onerror = () => {
+                                resolve(getFallbackTheme());
+                            };
+
+                            transaction.oncomplete = () => {
+                                db.close();
+                            };
+                        } catch (error) {
+                            console.error('[FloatingMenu] IndexedDB事务错误:', error);
+                            resolve(getFallbackTheme());
+                        }
+                    };
+                } catch (error) {
+                    console.error('[FloatingMenu] IndexedDB操作失败:', error);
+                    resolve(getFallbackTheme());
+                }
+            });
+        };
+
+        // 获取备用主题（从localStorage或cookie）
+        const getFallbackTheme = () => {
             try {
-                return localStorage.getItem('theme') || initialThemes[0];
+                // 尝试从localStorage获取
+                const localTheme = localStorage.getItem('theme');
+                if (localTheme) {
+                    return localTheme;
+                }
+
+                // 尝试从cookie获取
+                const themeCookie = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('theme='));
+
+                if (themeCookie) {
+                    return themeCookie.split('=')[1];
+                }
+            } catch (e) {
+                console.error('[FloatingMenu] 获取备用主题失败:', e);
+            }
+
+            // 默认主题
+            return DEFAULT_THEME;
+        };
+
+        // 获取存储的主题 - 优先使用IndexedDB，然后回退到localStorage和cookie
+        const getStoredTheme = async () => {
+            try {
+                // 尝试从IndexedDB获取
+                const theme = await getThemeFromIndexedDB();
+                return theme;
             } catch (error) {
-                console.error('Error reading theme from localStorage:', error);
-                return initialThemes[0];
+                console.error('[FloatingMenu] 从IndexedDB获取主题失败，尝试备用方法:', error);
+                return getFallbackTheme();
             }
         };
-        
-        const setStoredTheme = (theme) => {
+
+        // 保存主题到IndexedDB
+        const saveThemeToIndexedDB = (theme) => {
+            return new Promise((resolve, reject) => {
+                try {
+                    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                    request.onerror = (event) => {
+                        console.error('[FloatingMenu] 打开IndexedDB失败:', event);
+                        reject(new Error('无法打开主题数据库'));
+                    };
+
+                    request.onsuccess = (event) => {
+                        const db = event.target.result;
+                        const transaction = db.transaction([THEME_STORE], 'readwrite');
+                        const store = transaction.objectStore(THEME_STORE);
+
+                        const themeData = {
+                            id: THEME_KEY,
+                            value: theme,
+                            timestamp: Date.now()
+                        };
+
+                        const putRequest = store.put(themeData);
+
+                        putRequest.onsuccess = () => {
+                            resolve();
+                        };
+
+                        putRequest.onerror = (event) => {
+                            console.error('[FloatingMenu] 保存主题到IndexedDB失败:', event);
+                            reject(new Error('保存主题失败'));
+                        };
+
+                        transaction.oncomplete = () => {
+                            db.close();
+                        };
+                    };
+
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains(THEME_STORE)) {
+                            db.createObjectStore(THEME_STORE, { keyPath: 'id' });
+                        }
+                    };
+                } catch (error) {
+                    console.error('[FloatingMenu] IndexedDB操作失败:', error);
+                    reject(error);
+                }
+            });
+        };
+
+        // 全面保存主题到所有存储位置
+        const setStoredTheme = async (theme) => {
             try {
+                // 保存到IndexedDB
+                await saveThemeToIndexedDB(theme);
+
+                // 同时保存到localStorage作为备份
                 localStorage.setItem('theme', theme);
+
+                // 同时保存到cookie (7天过期)
+                const expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + 7);
+                document.cookie = `theme=${theme}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
+
+                console.log('[FloatingMenu] 主题已保存到所有存储位置:', theme);
             } catch (error) {
-                console.error('Error saving theme to localStorage:', error);
+                console.error('[FloatingMenu] 保存主题失败:', error);
+                // 出错时至少尝试保存到localStorage
+                try {
+                    localStorage.setItem('theme', theme);
+                } catch (e) {
+                    console.error('[FloatingMenu] 回退到localStorage也失败:', e);
+                }
             }
         };
 
         const applyTheme = (theme) => {
             // 设置HTML根元素的data-theme属性
             document.documentElement.setAttribute('data-theme', theme);
-            
+
             // 根据常见暗色主题名称判断是否添加dark类
-            document.documentElement.classList.toggle('dark', 
+            document.documentElement.classList.toggle('dark',
                 ['dracula', 'synthwave', 'dark', 'night', 'coffee'].includes(theme));
-            
+
             // 高亮当前选中的主题按钮
             themeBtns.forEach(btn => {
                 const themeValue = btn.dataset.themeValue;
                 btn.classList.toggle('btn-active', themeValue === theme);
                 btn.classList.toggle('btn-primary', themeValue === theme);
             });
-            
+
             // 更新header中的theme-controller单选按钮
             const themeControllers = document.querySelectorAll('input[name="theme-buttons"]');
             themeControllers.forEach(controller => {
@@ -161,13 +412,13 @@ const {
                     controller.checked = true;
                 }
             });
-            
+
             // 强制重新应用样式以确保所有组件正确刷新
             const bodyElement = document.body;
             if (bodyElement) {
                 // 添加临时类触发重新布局
                 bodyElement.classList.add('theme-refreshing');
-                
+
                 // 在下一帧移除临时类触发重新渲染
                 requestAnimationFrame(() => {
                     bodyElement.classList.remove('theme-refreshing');
@@ -175,9 +426,20 @@ const {
             }
         };
 
+        // 初始化主题
+        const initTheme = async () => {
+            try {
+                const theme = await getStoredTheme();
+                applyTheme(theme);
+            } catch (error) {
+                console.error('[FloatingMenu] 初始化主题失败:', error);
+                // 出错时使用默认主题
+                applyTheme(DEFAULT_THEME);
+            }
+        };
+
         // 应用初始主题
-        const currentTheme = getStoredTheme();
-        applyTheme(currentTheme);
+        initTheme();
 
         // 主题按钮点击事件
         themeBtns.forEach(btn => {
@@ -195,31 +457,68 @@ const {
             if (!container || !toggleBtn?.contains(e.target)) return; // 仅通过主按钮拖动
 
             isDragging = true;
-            startX = e.clientX || e.touches?.[0].clientX;
-            startY = e.clientY || e.touches?.[0].clientY;
+
+            // 修复移动端拖拽问题
+            if (e.type === 'touchstart') {
+                if (e.touches && e.touches.length > 0) {
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                }
+            } else {
+                startX = e.clientX;
+                startY = e.clientY;
+            }
+
+            // 获取当前变换矩阵
             const transform = window.getComputedStyle(container).transform;
             if (transform && transform !== 'none') {
-                const matrix = transform.match(/matrix.*\((.+)\)/);
-                if (matrix && matrix[1]) {
-                    const values = matrix[1].split(', ');
-                    initialX = parseFloat(values[4]) || 0;
-                    initialY = parseFloat(values[5]) || 0;
-                } else {
+                try {
+                    const matrix = transform.match(/matrix.*\((.+)\)/);
+                    if (matrix && matrix[1]) {
+                        const values = matrix[1].split(', ');
+                        initialX = parseFloat(values[4]) || 0;
+                        initialY = parseFloat(values[5]) || 0;
+                    } else {
+                        initialX = 0; initialY = 0;
+                    }
+                } catch (err) {
+                    console.error('解析变换矩阵时出错:', err);
                     initialX = 0; initialY = 0;
                 }
             } else {
-                 initialX = 0; initialY = 0;
+                initialX = 0; initialY = 0;
             }
+
+            // 添加视觉反馈
             container.style.transition = 'none'; // 拖动时禁用过渡效果
             container.classList.add('dragging');
+
+            // 防止移动端滚动干扰
+            if (e.type === 'touchstart') {
+                e.preventDefault();
+            }
         };
 
         const handleDragging = (e) => {
             if (!isDragging || !container) return;
             e.preventDefault();
 
-            const currentClientX = e.clientX || e.touches?.[0].clientX;
-            const currentClientY = e.clientY || e.touches?.[0].clientY;
+            let currentClientX, currentClientY;
+
+            // 处理触摸事件和鼠标事件
+            if (e.type === 'touchmove') {
+                if (e.touches && e.touches.length > 0) {
+                    currentClientX = e.touches[0].clientX;
+                    currentClientY = e.touches[0].clientY;
+                } else {
+                    return; // 没有触摸点，退出
+                }
+            } else {
+                currentClientX = e.clientX;
+                currentClientY = e.clientY;
+            }
+
+            // 计算位移
             const dx = currentClientX - startX;
             const dy = currentClientY - startY;
 
@@ -231,10 +530,17 @@ const {
             const maxX = window.innerWidth - rect.width;
             const maxY = window.innerHeight - rect.height;
 
+            // 确保不会移出屏幕
             currentX = Math.max(0 - (rect.left - initialX), Math.min(maxX - (rect.left - initialX), currentX));
             currentY = Math.max(0 - (rect.top - initialY), Math.min(maxY - (rect.top - initialY), currentY));
 
+            // 应用变换
             container.style.transform = `translate(${currentX}px, ${currentY}px)`;
+
+            // 添加拖动反馈
+            if (!container.classList.contains('dragging-active')) {
+                container.classList.add('dragging-active');
+            }
         };
 
         const handleDragEnd = () => {
@@ -242,27 +548,53 @@ const {
             isDragging = false;
             container.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'; // 恢复平滑过渡
             container.classList.remove('dragging');
+            container.classList.remove('dragging-active');
 
-            // 靠近边缘时自动吸附
+            // 靠近边缘时自动吸附并收缩
             const rect = container.getBoundingClientRect();
             const threshold = 50; // 距离边缘触发吸附的像素数
             const snapSpeed = '0.2s';
 
             let finalX = currentX;
             let finalY = currentY;
+            let shouldCollapse = false;
 
-            if (rect.left < threshold) finalX = 0 - (rect.left - initialX); // 左侧吸附
-            else if (rect.right > window.innerWidth - threshold) finalX = (window.innerWidth - rect.width) - (rect.left - initialX); // 右侧吸附
+            // 检测是否靠近边缘
+            if (rect.left < threshold) {
+                finalX = 0 - (rect.left - initialX); // 左侧吸附
+                shouldCollapse = true;
+            } else if (rect.right > window.innerWidth - threshold) {
+                finalX = (window.innerWidth - rect.width) - (rect.left - initialX); // 右侧吸附
+                shouldCollapse = true;
+            }
 
-            if (rect.top < threshold) finalY = 0 - (rect.top - initialY); // 顶部吸附
-            else if (rect.bottom > window.innerHeight - threshold) finalY = (window.innerHeight - rect.height) - (rect.top - initialY); // 底部吸附
+            if (rect.top < threshold) {
+                finalY = 0 - (rect.top - initialY); // 顶部吸附
+                shouldCollapse = true;
+            } else if (rect.bottom > window.innerHeight - threshold) {
+                finalY = (window.innerHeight - rect.height) - (rect.top - initialY); // 底部吸附
+                shouldCollapse = true;
+            }
 
-             if (finalX !== currentX || finalY !== currentY) {
-                 container.style.transition = `transform ${snapSpeed} ease-out`;
-                 container.style.transform = `translate(${finalX}px, ${finalY}px)`;
-                 currentX = finalX; // 更新位置
-                 currentY = finalY;
-             }
+            if (finalX !== currentX || finalY !== currentY) {
+                container.style.transition = `transform ${snapSpeed} ease-out`;
+                container.style.transform = `translate(${finalX}px, ${finalY}px)`;
+                currentX = finalX; // 更新位置
+                currentY = finalY;
+            }
+
+            // 如果靠近边缘，自动收缩一半
+            if (shouldCollapse) {
+                setTimeout(() => {
+                    collapseMenu();
+                }, 300);
+            }
+
+            // 添加完成动画
+            container.classList.add('drag-complete');
+            setTimeout(() => {
+                container.classList.remove('drag-complete');
+            }, 300);
         };
 
         // 添加拖拽事件监听
@@ -321,8 +653,27 @@ const {
 <style>
 /* 拖动状态 */
 .dragging {
-    opacity: 0.8;
+    opacity: 0.9;
     z-index: 1000; /* 确保拖动时位于顶层 */
+    cursor: grabbing;
+    transform: scale(1.05);
+}
+
+/* 激活拖动状态 - 增强视觉反馈 */
+.dragging-active {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    transform: scale(1.08) !important;
+}
+
+/* 拖动完成动画 */
+.drag-complete {
+    animation: pulse 0.3s ease-in-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
 /* 响应式调整 */
@@ -377,21 +728,24 @@ const {
 
 /* 折叠过渡平滑 */
 .collapse-content {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
                 opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     opacity: 0;
     max-height: 0;
     overflow: hidden;
     visibility: hidden;
-    transform: translateY(10px); /* 初始位置略低 */
+    transform: translateY(10px) scale(0.95); /* 初始位置略低且缩小 */
+    transform-origin: bottom center;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
 .collapse:has(input:checked) .collapse-content {
     max-height: 20rem; /* 内容的足够高度 */
     visibility: visible;
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .menu-toggle-btn .open-icon,
@@ -401,7 +755,21 @@ const {
 
 /* 主题按钮激活状态 */
 .theme-btn.btn-active {
-    box-shadow: 0 0 0 2px hsl(var(--p));
-    transform: scale(1.1);
+    box-shadow: 0 0 0 2px hsl(var(--p)), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: scale(1.15);
+    background-color: hsl(var(--p) / 0.2);
+    border-color: hsl(var(--p));
+}
+
+/* 菜单收缩状态 */
+.menu-collapsed {
+    opacity: 0.6;
+    filter: saturate(0.8);
+    transition: all 0.3s ease-out;
+}
+
+.menu-collapsed:hover {
+    opacity: 1;
+    filter: saturate(1);
 }
 </style>

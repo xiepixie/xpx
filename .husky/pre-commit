@@ -1,2 +1,2 @@
 
-bun lint-staged 
+npx lint-staged --allow-empty

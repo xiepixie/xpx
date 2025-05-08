@@ -1,8 +1,10 @@
 ---
-// src/components/NotebookKanban.astro
-// This component is fully interactive, so we'll render the React component directly.
-import NotebookKanbanReact from './react/NotebookKanban.tsx'
+import NotebookKanbanReact from './react/NotebookKanban'
 import '../styles/global.css'
+import { getCollection } from 'astro:content'
+
+// 获取所有博客文章，用于与看板集成
+const blogPosts = await getCollection('blog');
 
 export interface Props {
     // 是否显示状态切换按钮
@@ -11,9 +13,16 @@ export interface Props {
     maxPublishedItems?: number
     // 指定初始状态
     initialStatus?: 'Draft' | 'In Review' | 'Published'
+    // 看板标题
     title?: string;
+    // 看板描述
     description?: string;
+    // 组件ID，用于多个看板实例
     id?: string;
+    // 是否启用新任务创建按钮
+    enableNewTask?: boolean;
+    // 是否启用与博客文章的集成
+    enableBlogIntegration?: boolean;
 }
 
 const {
@@ -22,11 +31,32 @@ const {
     initialStatus = 'Draft',
     title = "看板任务",
     description = "跟踪和管理您的写作任务",
-    id = ""
+    id = "main-kanban",
+    enableNewTask = true,
+    enableBlogIntegration = true
 } = Astro.props
+
+// 准备博客文章数据，仅在启用博客集成时传递
+const blogPostsData = enableBlogIntegration ? blogPosts.map(post => ({
+    id: post.id,
+    title: post.data.title,
+    publishDate: post.data.publish_date,
+    updateDate: post.data.update_date,
+    tags: post.data.tags || [],
+    url: `blog/${post.id}/`,
+    draft: post.data.draft || false
+})) : [];
 ---
 
 <NotebookKanbanReact
     client:load
+    showStatusButtons={showStatusButtons}
+    maxPublishedItems={maxPublishedItems}
+    initialStatus={initialStatus}
+    title={title}
+    description={description}
+    id={id}
+    enableNewTask={enableNewTask}
+    blogPosts={blogPostsData}
+    enableBlogIntegration={enableBlogIntegration}
 />
-

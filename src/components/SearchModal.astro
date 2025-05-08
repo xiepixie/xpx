@@ -1,0 +1,78 @@
+---
+import { X as XIcon } from './react/Icons';
+import { getPath } from '../lib/path';
+import Search from './Search.astro';
+
+// 获取基础路径
+const basePath = import.meta.env.PUBLIC_USE_BASE_PATH ? `/${import.meta.env.PUBLIC_BASE_PATH}` : '';
+---
+
+<script is:inline define:vars={{ basePath }}>
+  // 将基础路径暴露给客户端脚本
+  window.xpxBlogBasePath = basePath;
+</script>
+
+<dialog id="search-modal" class="modal">
+  <div class="modal-box w-11/12 max-w-3xl">
+    <form method="dialog">
+      <button id="close-search-modal" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+        <XIcon className="h-5 w-5" />
+      </button>
+    </form>
+
+    <h3 class="font-bold text-lg mb-4">站内搜索</h3>
+
+    <!-- 使用新的Search组件 -->
+    <Search id="modal-search" placeholder="输入关键词搜索..." />
+  </div>
+
+  <form method="dialog" class="modal-backdrop">
+    <button>关闭</button>
+  </form>
+</dialog>
+
+<script>
+  document.addEventListener('astro:page-load', async () => {
+    // 获取DOM元素
+    const searchModal = document.getElementById('search-modal') as HTMLDialogElement;
+    const closeButton = document.getElementById('close-search-modal');
+
+    // 监听 Escape 键关闭模态框
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && searchModal && searchModal.open) {
+        searchModal.close();
+      }
+    });
+
+    // 监听关闭按钮点击
+    if (closeButton) {
+      closeButton.addEventListener('click', () => {
+        if (searchModal) {
+          searchModal.close();
+        }
+      });
+    }
+
+    // 监听模态框打开事件
+    if (searchModal) {
+      searchModal.addEventListener('showModal', () => {
+        // 聚焦搜索输入框
+        setTimeout(() => {
+          const searchInput = document.querySelector('#modal-search input') as HTMLInputElement;
+          if (searchInput) {
+            searchInput.focus();
+          }
+        }, 100);
+      });
+    }
+  });
+</script>
+
+
+
+<script is:inline>
+  // 确保全局变量存在
+  if (!window.hasOwnProperty('xpxBlogBasePath')) {
+    window.xpxBlogBasePath = '';
+  }
+</script>

@@ -7,6 +7,13 @@
  * 3. 延迟加载非关键资源
  */
 
+// 获取基础路径
+function getBasePath() {
+    // 从 HTML 元素的 data-base-path 属性获取基础路径
+    const basePath = document.documentElement.dataset.basePath || '';
+    return basePath ? `/${basePath}` : '';
+}
+
 // 在 DOM 加载完成后执行
 document.addEventListener('DOMContentLoaded', () => {
     console.log('预加载和预取脚本已加载')
@@ -56,7 +63,16 @@ function prefetchUrl(url) {
     // 创建link元素
     const link = document.createElement('link')
     link.rel = 'prefetch'
-    link.href = url
+
+    // 处理相对路径
+    let finalUrl = url;
+    if (url.startsWith('/') && !url.startsWith('//')) {
+        // 添加基础路径
+        const basePath = getBasePath();
+        finalUrl = basePath + url;
+    }
+
+    link.href = finalUrl
 
     // 添加到head
     document.head.appendChild(link)
@@ -73,6 +89,10 @@ function lazyLoadNonCriticalResources() {
         loadFont(
             'https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&display=swap'
         )
+
+        // 加载本地字体
+        const basePath = getBasePath();
+        loadFont(`${basePath}/fonts/local-fonts.css`)
     }, 2000) // 延迟2秒加载
 
     // 延迟加载其他非关键脚本

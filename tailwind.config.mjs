@@ -19,6 +19,7 @@ export default {
         "4xl": "2320px",
         "5xl": "3000px",
       },
+        
     },
   },
   plugins: [require("daisyui"),require('@tailwindcss/typography')],

@@ -1,0 +1,71 @@
+---
+import { getPath } from '../lib/path';
+
+// 获取基础路径
+const basePath = import.meta.env.PUBLIC_USE_BASE_PATH ? `/${import.meta.env.PUBLIC_BASE_PATH}` : '';
+---
+
+<!--
+  PagefindHighlight组件
+  用于在搜索结果页面高亮搜索关键词
+-->
+<script is:inline define:vars={{ basePath }}>
+  document.addEventListener('DOMContentLoaded', async function() {
+    try {
+      // 获取URL中的highlight参数
+      const urlParams = new URLSearchParams(window.location.search);
+      const highlightParam = urlParams.get('highlight');
+
+      // 如果没有highlight参数，不执行高亮
+      if (!highlightParam) return;
+
+      console.log('检测到highlight参数:', highlightParam);
+
+      // 获取基础路径
+      const basePathValue = basePath || '';
+
+      // 检测当前环境
+      const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      console.log('高亮组件 - 当前环境:', isDev ? '开发模式' : '生产模式');
+
+      // 动态加载pagefind-highlight.js
+      const script = document.createElement('script');
+      /* @vite-ignore */
+      script.src = `${basePathValue}/pagefind/pagefind-highlight.js`;
+      script.type = 'module';
+
+      // 等待脚本加载完成
+      await new Promise((resolve, reject) => {
+        script.onload = resolve;
+        script.onerror = (e) => {
+          console.error('加载pagefind-highlight.js失败:', e);
+          reject(e);
+        };
+        document.body.appendChild(script);
+      });
+
+      // 初始化高亮
+      new PagefindHighlight({
+        highlightParam: "highlight",
+        style: {
+          mark: "background-color: rgba(var(--p), 0.2); color: hsl(var(--p)); padding: 0 2px; border-radius: 2px;"
+        },
+        // 在开发模式下设置额外选项
+        ...(isDev ? {
+          // 在开发模式下可能需要额外配置
+          debug: true
+        } : {})
+      });
+
+      console.log('高亮初始化完成，参数:', {
+        highlightParam: "highlight",
+        debug: isDev
+      });
+
+      console.log('高亮初始化完成');
+
+    } catch (error) {
+      console.error('初始化高亮功能失败:', error);
+    }
+  });
+</script>
